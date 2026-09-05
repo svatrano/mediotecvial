@@ -1,0 +1,79 @@
+# Virtualenv
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+.webassets-cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Configuración local
+.env
+.env.example*
+.env.local
+.env.*.local
+GEMINI.md
+
+# Logs
+*.log
+firewatch.log
+./logs/
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+
+# OCI
+.oci/
+oci_config
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+*.bak
+*.docx
+prueba_conexion.py
+backup-vehiculos.csv
+backup-db.sql
+
+# Node modules (si usas frontend tools)
+node_modules/
+npm-debug.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos cargados (temporales)
+uploads/
+temp_uploads/
+
+# IDE settings
+.vscode/settings.json
+.idea/workspace.xml
+
+AZURE_DEPLOYMENT.md

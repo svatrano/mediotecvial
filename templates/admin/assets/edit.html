@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Activo - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="page-title mb-4">
+            <i class="bi bi-pencil-square"></i> Editar Activo
+        </h1>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.edit_asset', asset_id=asset.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cliente</label>
+                        <input type="text" class="form-control bg-light" value="{{ asset.client.name }}" readonly disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo de Activo</label>
+                        <input type="text" class="form-control bg-light" value="{% if asset.asset_type == 'building' %}Edificio{% else %}Vehículo{% endif %}" readonly disabled>
+                        <input type="hidden" id="asset_type" value="{{ asset.asset_type }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Nombre del Activo <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nombre del activo"
+                            value="{{ asset.name }}" required>
+                    </div>
+
+                    {% if asset.asset_type == 'building' %}
+                    <div id="building_fields">
+                        <div class="mb-3">
+                            <label for="address_or_model" class="form-label fw-bold">Dirección del Edificio <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="address_or_model" name="address_or_model"
+                                placeholder="Dirección del edificio" value="{{ asset.address_or_model }}" required>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div id="vehicle_fields">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="vehicle_template_id" class="form-label fw-bold mb-0">Modelo de Vehículo (Catálogo) <span class="text-danger">*</span></label>
+                                <a href="{{ url_for('admin.list_vehicle_templates') }}" target="_blank" class="small text-decoration-none">
+                                    <i class="bi bi-plus-circle me-1"></i>Gestionar Catálogo
+                                </a>
+                            </div>
+                            <select class="form-select" id="vehicle_template_id" name="vehicle_template_id" required>
+                                <option value="">-- Selecciona un Modelo del Catálogo (Marca - Modelo - Año Modelo) --</option>
+                                {% for template in vehicle_templates %}
+                                <option value="{{ template.id }}" {% if asset.vehicle_template_id == template.id %}selected{% endif %}>
+                                    {{ template.brand }} - {{ template.model }} (Año modelo: {{ template.year }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">La hoja de rescate se vinculará desde la plantilla seleccionada.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="manufacturing_year" class="form-label fw-bold">Año de Fabricación <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="manufacturing_year" name="manufacturing_year"
+                                    placeholder="Ej: 2024" value="{{ asset.manufacturing_year or '' }}" required min="1900" max="2100">
+                                <small class="text-muted">Año exacto de fabricación de esta unidad</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="domain" class="form-label fw-bold">Dominio / Patente <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control text-uppercase" id="domain" name="domain"
+                                    placeholder="Ej: AB123CD" value="{{ asset.domain or '' }}" required oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="additional_fuel" class="form-label fw-bold">Combustible Adicional</label>
+                            <select class="form-select" id="additional_fuel" name="additional_fuel">
+                                <option value="" {% if not asset.additional_fuel or asset.additional_fuel == 'No informado' %}selected{% endif %}>No informado</option>
+                                <option value="Nafta" {% if asset.additional_fuel == 'Nafta' %}selected{% endif %}>Nafta</option>
+                                <option value="Gasoil" {% if asset.additional_fuel == 'Gasoil' %}selected{% endif %}>Gasoil</option>
+                                <option value="Gas" {% if asset.additional_fuel == 'Gas' %}selected{% endif %}>Gas (GNC/GLP)</option>
+                                <option value="Nitro" {% if asset.additional_fuel == 'Nitro' %}selected{% endif %}>Nitro</option>
+                                <option value="Batería adicional" {% if asset.additional_fuel == 'Batería adicional' %}selected{% endif %}>Batería adicional</option>
+                                <option value="Híbrido" {% if asset.additional_fuel in ['Híbrido', 'Hybrido'] %}selected{% endif %}>Híbrido</option>
+                                <option value="Eléctrico" {% if asset.additional_fuel in ['Eléctrico', 'Electrico'] %}selected{% endif %}>Eléctrico</option>
+                                <option value="Eléctrico / Híbrido" {% if asset.additional_fuel in ['Eléctrico / Híbrido', 'Híbrido / Eléctrico', 'electrico Hibrido', 'Electrico Hibrido'] %}selected{% endif %}>Eléctrico / Híbrido</option>
+                                <option value="OTRO" {% if asset.additional_fuel == 'OTRO' %}selected{% endif %}>OTRO</option>
+                            </select>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-bold">Descripción / Observaciones</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                            placeholder="Información adicional sobre el activo">{{ asset.description or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if asset.is_active %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">Activo Habilitado</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-1"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('admin.list_assets') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

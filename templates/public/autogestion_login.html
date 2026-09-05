@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Autogestión de Activo - Firewatch{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" style="min-height: calc(100vh - 200px); display: flex; align-items: center;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-login">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="bi bi-shield-lock text-warning"></i> Validación Requerida
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <h5 class="text-center mb-4">Autogestión de Activo: <strong>{{ asset.name }}</strong></h5>
+                
+                <p class="text-muted text-center mb-4">
+                    Para acceder a la actualización de datos de este vehículo, por favor ingrese la siguiente información por razones de seguridad.
+                </p>
+
+                <form method="POST" action="{{ url_for('emergency.public_autogestion', asset_id=asset.id) }}">
+                    <div class="mb-3">
+                        <label for="domain" class="form-label">Dominio (Patente)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-car-front"></i></span>
+                            <input type="text" class="form-control" id="domain" name="domain" required placeholder="Ingrese la patente del vehículo">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_number" class="form-label">Número de Identificación del Propietario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <input type="text" class="form-control" id="id_number" name="id_number" required placeholder="DNI, CUIT, etc.">
+                        </div>
+                        <small class="text-muted">Documento del titular registrado en el sistema.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Validar Acceso
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

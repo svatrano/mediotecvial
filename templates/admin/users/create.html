@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Usuario - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="page-title">
+            <i class="bi bi-person-plus"></i> Crear Nuevo Usuario
+        </h1>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.create_user') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Usuario</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            placeholder="Nombre de usuario único" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email"
+                            placeholder="correo@ejemplo.com" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                            placeholder="Contraseña (mín. 8 caracteres)" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Rol</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="">-- Selecciona un rol --</option>
+                            {% for role in roles %}
+                            <option value="{{ role }}">
+                                {% if role == 'admin' %}
+                                Administrador
+                                {% elif role == 'firefighter' %}
+                                Bombero
+                                {% else %}
+                                Cliente
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Crear Usuario
+                        </button>
+                        <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

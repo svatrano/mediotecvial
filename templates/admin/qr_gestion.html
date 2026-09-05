@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Lotes QR - Mediotec Vial{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h1 class="page-title mb-0">
+            <i class="bi bi-qr-code text-danger"></i> Gestión y Control de Lotes QR
+        </h1>
+        <p class="text-muted mb-0">Generación masiva para imprenta, auditoría de códigos vírgenes y vehículos vinculados</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if lote_filtro %}
+        <a href="{{ url_for('admin_qr.exportar_lote_csv', lote=lote_filtro) }}" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Exportar Lote {{ lote_filtro }} (CSV)
+        </a>
+        {% elif lotes %}
+        <a href="{{ url_for('admin_qr.exportar_lote_csv', lote=lotes[0]) }}" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Exportar Último Lote (CSV)
+        </a>
+        {% endif %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver al Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Resumen de Métricas -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-white text-center p-3">
+            <span class="text-muted small text-uppercase fw-bold">Total Códigos Generados</span>
+            <h2 class="display-6 fw-bold mb-0 text-dark">{{ total_qrs }}</h2>
+            <small class="text-muted">En base de datos</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-white text-center p-3 border-warning" style="border-left: 4px solid #F4A261 !important;">
+            <span class="text-warning small text-uppercase fw-bold"><i class="bi bi-circle"></i> Vírgenes Disponibles</span>
+            <h2 class="display-6 fw-bold mb-0 text-warning">{{ virgenes }}</h2>
+            <small class="text-muted">Para adherir a vehículos</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-white text-center p-3 border-success" style="border-left: 4px solid #2a9d8f !important;">
+            <span class="text-success small text-uppercase fw-bold"><i class="bi bi-check-circle"></i> QRs Activados</span>
+            <h2 class="display-6 fw-bold mb-0 text-success">{{ activados }}</h2>
+            <small class="text-muted">Con hoja de rescate activa</small>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de Generación de Lote de QRs -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i> Generador de Lote de QRs Vírgenes (Para Imprenta)
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('admin_qr.generar_lote') }}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="cantidad" class="form-label fw-bold">Cantidad de Códigos a Generar <span class="text-danger">*</span></label>
+                <input type="number" class="form-control form-control-lg" id="cantidad" name="cantidad" min="1" max="10000" placeholder="Ej: 50, 100, 500" required>
+                <small class="text-muted">Se generarán UUIDs únicos v4 en estado VIRGEN.</small>
+            </div>
+            <div class="col-md-5">
+                <label for="lote" class="form-label fw-bold">Identificador de Lote <span class="text-muted">(Opcional)</span></label>
+                <input type="text" class="form-control form-control-lg" id="lote" name="lote" placeholder="Ej: IMPRENTA-2026-01 / LOTE-ZONA-SUR">
+                <small class="text-muted">Si se deja en blanco se asignará automáticamente con la fecha actual.</small>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-magic me-1"></i> Generar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Filtros y Búsqueda Interactiva -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body p-3">
+        <form method="GET" action="{{ url_for('admin_qr.gestion_qrs') }}" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="q" value="{{ busqueda }}" placeholder="Buscar por UUID, patente, cliente...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="estado">
+                    <option value="">-- Todos los Estados --</option>
+                    <option value="VIRGEN" {% if estado_filtro == 'VIRGEN' %}selected{% endif %}>VÍRGENES (Sin activar)</option>
+                    <option value="ACTIVADO" {% if estado_filtro == 'ACTIVADO' %}selected{% endif %}>ACTIVADOS</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="lote">
+                    <option value="">-- Todos los Lotes --</option>
+                    {% for l in lotes %}
+                    <option value="{{ l }}" {% if lote_filtro == l %}selected{% endif %}>{{ l }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+                {% if busqueda or estado_filtro or lote_filtro %}
+                <a href="{{ url_for('admin_qr.gestion_qrs') }}" class="btn btn-outline-secondary" title="Limpiar filtros">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla Interactiva de QRs -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        {% if qrs.items %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">UUID del QR</th>
+                        <th>Lote</th>
+                        <th>Fecha Creación</th>
+                        <th>Estado</th>
+                        <th>Vehículo Vinculado</th>
+                        <th>Cliente</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in qrs.items %}
+                    <tr>
+                        <td class="ps-4 font-monospace">
+                            <span class="fw-bold text-primary">{{ item.id }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary font-monospace">{{ item.lote_impresion }}</span>
+                        </td>
+                        <td class="small text-muted">
+                            {{ item.fecha_generacion.strftime('%d/%m/%Y %H:%M') if item.fecha_generacion else '--' }}
+                        </td>
+                        <td>
+                            {% if item.estado == 'VIRGEN' %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-hourglass-split me-1"></i>VIRGEN
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle-fill me-1"></i>ACTIVADO
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.activo %}
+                            <div>
+                                <span class="badge bg-dark font-monospace">{{ item.activo.domain or 'S/D' }}</span>
+                                <span class="small fw-semibold ms-1">{{ item.activo.name }}</span>
+                            </div>
+                            {% else %}
+                            <span class="text-muted small fst-italic">Sin vehículo asignado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.activo and item.activo.client %}
+                            <span class="small fw-bold">{{ item.activo.client.nombre }}</span>
+                            {% else %}
+                            <span class="text-muted small">--</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('qr_router.escanear_qr', qr_uuid=item.id) }}" target="_blank" class="btn btn-outline-primary" title="Probar escaneo de URL">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                                {% if item.activo %}
+                                <a href="{{ url_for('public.hoja_rescate', uid=item.activo.id) }}" target="_blank" class="btn btn-outline-danger" title="Ver Hoja de Rescate">
+                                    <i class="bi bi-file-earmark-medical"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if qrs.pages > 1 %}
+        <div class="p-3 border-top">
+            <nav aria-label="Navegación de páginas">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if qrs.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_qr.gestion_qrs', page=qrs.prev_num, estado=estado_filtro, lote=lote_filtro, q=busqueda) }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item active">
+                        <span class="page-link">Página {{ qrs.page }} de {{ qrs.pages }}</span>
+                    </li>
+                    {% if qrs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_qr.gestion_qrs', page=qrs.next_num, estado=estado_filtro, lote=lote_filtro, q=busqueda) }}">Siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-qr-code-scan text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">No se encontraron códigos QR</h5>
+            <p class="text-muted">Utilice el formulario superior para generar su primer lote de códigos vírgenes.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

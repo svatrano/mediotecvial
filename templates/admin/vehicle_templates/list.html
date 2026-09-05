@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Modelos de Vehículos - Firewatch{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title mb-0">
+            <i class="bi bi-truck text-danger"></i> Catálogo de Modelos de Vehículos
+        </h1>
+        <p class="text-muted mb-0">Gestión de hojas de rescate estandarizadas por marca, modelo y año</p>
+    </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
+        <i class="bi bi-plus-lg me-1"></i> Nueva Hoja de Rescate
+    </button>
+</div>
+
+<!-- Tabla de Plantillas -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        {% if templates %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Marca</th>
+                        <th>Modelo</th>
+                        <th>Año del Modelo</th>
+                        <th>Hoja de Rescate</th>
+                        <th>Vehículos Asociados</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in templates %}
+                    <tr>
+                        <td class="ps-4 font-monospace fw-bold text-uppercase">{{ t.brand }}</td>
+                        <td class="fw-semibold text-uppercase">{{ t.model }}</td>
+                        <td><span class="badge bg-secondary font-monospace fs-6">{{ t.year }}</span></td>
+                        <td>
+                            <a href="{{ t.rescue_sheet_url }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Ver Documento
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                <i class="bi bi-car-front me-1"></i>{{ t.assets.count() }} activo(s)
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editTemplateModal{{ t.id }}">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+
+                            {% if t.assets.count() == 0 %}
+                            <form action="{{ url_for('admin.delete_vehicle_template', template_id=t.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar esta plantilla de hoja de rescate?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
+                            {% else %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="No se puede eliminar porque tiene vehículos asociados">
+                                <i class="bi bi-lock"></i> Eliminar
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-truck text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">No hay plantillas de hojas de rescate registradas</h5>
+            <p class="text-muted">Comience dando de alta un modelo de vehículo en el catálogo para asociar hojas de rescate.</p>
+            <button type="button" class="btn btn-primary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
+                <i class="bi bi-plus-lg me-1"></i> Crear Primera Plantilla
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Modales de Edición ─────────────────────────────────────────────────────
+   IMPORTANTE: deben estar FUERA de la tabla. Colocarlos dentro de <tbody>
+   produce HTML inválido: el browser reubica esos nodos, Bootstrap los
+   renderiza en posición incorrecta y el modal aparece "titilando" entre
+   dos posiciones en pantalla.
+   ──────────────────────────────────────────────────────────────────────────── #}
+{% for t in templates %}
+<div class="modal fade" id="editTemplateModal{{ t.id }}" tabindex="-1"
+     aria-label="Editar plantilla {{ t.brand }} {{ t.model }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Plantilla {{ t.brand }} {{ t.model }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('admin.update_vehicle_template', template_id=t.id) }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Marca <span class="text-danger">*</span></label>
+                        <input type="text" name="brand" class="form-control text-uppercase" value="{{ t.brand }}" required placeholder="Ej: FORD">
+                        <small class="text-muted">Se convertirá automáticamente a MAYÚSCULAS</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modelo <span class="text-danger">*</span></label>
+                        <input type="text" name="model" class="form-control text-uppercase" value="{{ t.model }}" required placeholder="Ej: RANGER">
+                        <small class="text-muted">Se convertirá automáticamente a MAYÚSCULAS</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Año del Modelo <span class="text-danger">*</span></label>
+                        <input type="number" name="year" class="form-control" value="{{ t.year }}" required min="1900" max="2100">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reemplazar Archivo Hoja de Rescate (Opcional)</label>
+                        <input type="file" name="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                        <small class="text-muted d-block mt-1">Dejar vacío si no desea cambiar el archivo existente.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modal Crear Plantilla -->
+<div class="modal fade" id="createTemplateModal" tabindex="-1"
+     aria-label="Nueva Hoja de Rescate" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>Nueva Hoja de Rescate (Catálogo)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('admin.create_vehicle_template') }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Marca <span class="text-danger">*</span></label>
+                        <input type="text" name="brand" class="form-control text-uppercase" required placeholder="Ej: FORD">
+                        <small class="text-muted">Se guardará automáticamente en MAYÚSCULAS</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modelo <span class="text-danger">*</span></label>
+                        <input type="text" name="model" class="form-control text-uppercase" required placeholder="Ej: RANGER">
+                        <small class="text-muted">Se guardará automáticamente en MAYÚSCULAS</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Año del Modelo <span class="text-danger">*</span></label>
+                        <input type="number" name="year" class="form-control" required min="1900" max="2100" placeholder="Ej: 2023">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Archivo Hoja de Rescate <span class="text-danger">*</span></label>
+                        <input type="file" name="file" class="form-control" required accept=".pdf,.jpg,.jpeg,.png,.gif">
+                        <small class="text-muted">Formatos permitidos: PDF, JPG, PNG, GIF (Máx 50MB)</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-upload me-1"></i> Subir y Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

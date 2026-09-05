@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Cliente - Mediotec Vial{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-6 col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white text-center py-4">
+                <img src="{{ url_for('static', filename='images/logo_2_fondo_blanco.png') }}" alt="Mediotec Logo"
+                     style="height: 60px; margin-bottom: 10px; border-radius: 4px; padding: 4px; background: white;">
+                <h2 class="h4 mb-1 text-white fw-bold">Registro de Nuevo Cliente</h2>
+                <p class="text-light opacity-75 mb-0 small">
+                    Crea tu cuenta para activar y gestionar las hojas de rescate de tus vehículos
+                </p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('auth.registro') }}">
+                    {% if next_url %}
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    {% endif %}
+
+                    <h6 class="text-primary text-uppercase fw-bold mb-3 small">
+                        <i class="bi bi-person-badge me-1"></i> Datos Personales / Institución
+                    </h6>
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label fw-bold">Nombre Completo / Razón Social <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nombre" name="nombre"
+                               placeholder="Ej: Juan Pérez o Empresa Logística S.A."
+                               value="{{ form_data.get('nombre', '') }}" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="dni_cuit" class="form-label fw-bold">DNI o CUIT <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control font-monospace" id="dni_cuit" name="dni_cuit"
+                                   placeholder="Ej: 20-12345678-9"
+                                   value="{{ form_data.get('dni_cuit', '') }}" required>
+                            <small class="text-muted">Sin espacios</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="telefono" class="form-label fw-bold">Teléfono de Contacto</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                   placeholder="Ej: +54 9 11 1234-5678"
+                                   value="{{ form_data.get('telefono', '') }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label fw-bold">Dirección / Localidad</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion"
+                               placeholder="Ej: Av. Corrientes 1234, CABA"
+                               value="{{ form_data.get('direccion', '') }}">
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="text-primary text-uppercase fw-bold mb-3 small">
+                        <i class="bi bi-shield-lock me-1"></i> Datos de Acceso
+                    </h6>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-bold">Correo Electrónico <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   placeholder="tu-correo@ejemplo.com"
+                                   value="{{ form_data.get('email', '') }}" required>
+                        </div>
+                        <small class="text-muted">Servirá como tu usuario de ingreso.</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold">Contraseña <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Mínimo 6 caracteres" minlength="6" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg py-2 fw-bold shadow-sm">
+                            <i class="bi bi-person-check-fill me-2"></i> Registrarme y Continuar
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small mb-0">
+                        ¿Ya tienes una cuenta registrada?
+                        <a href="{{ url_for('auth.login', next=next_url) }}" class="fw-bold text-decoration-none">
+                            Inicia sesión aquí
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

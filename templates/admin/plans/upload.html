@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Plano - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="page-title">
+            <i class="bi bi-upload"></i> Subir Plano de Emergencia
+        </h1>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>Activo: <strong>{{ asset.name }}</strong></h5>
+                <p class="mb-0">
+                    <strong>Tipo:</strong>
+                    {% if asset.asset_type == 'building' %}
+                    Edificio
+                    {% else %}
+                    Vehículo
+                    {% endif %}
+                    | <strong>Ubicación:</strong> {{ asset.address_or_model }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.upload_plan', asset_id=asset.id) }}"
+                    enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Archivo del Plano</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="file" name="file"
+                                accept=".pdf,.jpg,.jpeg,.png,.gif" required>
+                            <span class="input-group-text">
+                                <i class="bi bi-file-earmark-arrow-up"></i>
+                            </span>
+                        </div>
+                        <small class="form-text text-muted">
+                            Formatos permitidos: PDF, JPG, PNG, GIF (máx. 50 MB)
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-lightbulb"></i>
+                        <strong>Información:</strong> Se generará automáticamente un código QR que bomberos podrán
+                        escanear desde emergencias para acceder al plano rápidamente.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-cloud-upload"></i> Subir Plano
+                        </button>
+                        <a href="{{ url_for('admin.list_plans', asset_id=asset.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

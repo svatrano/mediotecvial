@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}{{ asset.name }} - Información de Emergencia - Firewatch{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">
+        {% if asset.asset_type == 'building' %}
+            <i class="bi bi-building"></i>
+        {% else %}
+            <i class="bi bi-truck text-danger"></i>
+        {% endif %}
+        {{ asset.name }}
+    </h1>
+    <a href="{{ url_for('emergency.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-2">
+                    <strong>Tipo:</strong>
+                    {% if asset.asset_type == 'building' %}
+                        <span class="badge bg-secondary">Edificio</span>
+                    {% else %}
+                        <span class="badge bg-danger">Vehículo</span>
+                    {% endif %}
+                </p>
+                <p class="mb-2">
+                    <strong>{% if asset.asset_type == 'building' %}Dirección:{% else %}Modelo / Marca:{% endif %}</strong>
+                    {{ asset.address_or_model }}
+                </p>
+                {% if asset.asset_type == 'vehicle' %}
+                    {% if asset.domain %}
+                        <p class="mb-2">
+                            <strong>Dominio / Patente:</strong> <span class="badge bg-dark font-monospace fs-6">{{ asset.domain }}</span>
+                        </p>
+                    {% endif %}
+                    {% if asset.manufacturing_year %}
+                        <p class="mb-2">
+                            <strong>Año de Fabricación:</strong> {{ asset.manufacturing_year }}
+                        </p>
+                    {% endif %}
+                    {% if asset.additional_fuel %}
+                        <p class="mb-2">
+                            <strong>Combustible Adicional:</strong> <span class="badge bg-warning text-dark fs-6">{{ asset.additional_fuel }}</span>
+                        </p>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {% if asset.description %}
+                    <p class="mb-2">
+                        <strong>Descripción / Observaciones:</strong><br>
+                        {{ asset.description }}
+                    </p>
+                {% endif %}
+                <p class="mb-0">
+                    <strong>Cliente:</strong> {{ asset.client.name }}
+                </p>
+            </div>
+        </div>
+
+        {% if asset.asset_type == 'vehicle' and asset.vehicle_template %}
+        <hr class="my-3">
+        <div class="p-3 bg-light rounded border border-danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1 text-danger fw-bold"><i class="bi bi-file-earmark-medical me-2"></i>Hoja de Rescate Vehicular</h5>
+                    <p class="mb-0 text-muted small">
+                        Catálogo: {{ asset.vehicle_template.brand }} {{ asset.vehicle_template.model }} (Año Modelo: {{ asset.vehicle_template.year }})
+                    </p>
+                </div>
+                <a href="{{ url_for('emergency.view_vehicle_rescue_sheet', asset_id=asset.id) }}" target="_blank" class="btn btn-danger btn-lg">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Abrir Hoja de Rescate
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if asset.asset_type == 'building' %}
+    <h3 class="h4 mb-3"><i class="bi bi-map me-2"></i>Planos de Emergencia Disponibles</h3>
+    {% if plans %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Archivo</th>
+                        <th>Versión</th>
+                        <th>Creado</th>
+                        <th class="text-end">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plan in plans %}
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-pdf text-danger me-1"></i> {{ plan.file_name }}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">v{{ plan.version }}</span>
+                            </td>
+                            <td>
+                                <small>{{ plan.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('emergency.view_plan', plan_id=plan.id) }}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-eye me-1"></i> Ver
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center py-4">
+            <i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i>
+            <p class="mt-3 mb-0">No hay planos disponibles para este activo</p>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

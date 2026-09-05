@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ asset.name }} - Hoja de Rescate - Firewatch{% endblock %}
+
+{% block content %}
+<div class="view-plan-page">
+    <div class="asset-info">
+        <h5>
+            <i class="bi bi-file-earmark-medical"></i>Dominio: {{ asset.domain }}
+            {% if asset.additional_fuel %}
+            <span class="badge bg-danger ms-2 text-uppercase" style="font-size: 0.7em; vertical-align: middle;">
+                <i class="bi bi-fire"></i> {{ asset.additional_fuel }}
+            </span>
+            {% endif %}
+        </h5>
+        <p>
+            <strong>Vehículo:</strong> {{ asset.brand }} {{ asset.model_name }} ({{ asset.manufacturing_year }})
+            <strong>Catálogo:</strong> {{ rescue_sheet.brand }} {{ rescue_sheet.model }} ({{ rescue_sheet.year }})
+            <strong>Descripción:</strong> {{ asset.name }}
+        </p>
+    </div>
+
+    <div class="controls-bar">
+        <h6 class="mb-0">
+            <i class="bi bi-file-earmark-pdf"></i> {{ rescue_sheet.brand }} {{ rescue_sheet.model }} - Hoja de Rescate
+        </h6>
+        <div class="d-flex gap-2">
+            <a href="{{ file_url }}" target="_blank" class="btn btn-emergency btn-sm" title="Abrir en otra pestaña">
+                <i class="bi bi-box-arrow-up-right"></i> <span class="d-none d-md-inline">Abrir</span>
+            </a>
+            <a href="{{ url_for('emergency.download_vehicle_rescue_sheet_qr', asset_id=asset.id) }}"
+                class="btn btn-outline-danger btn-sm" title="Descargar QR de la hoja de rescate">
+                <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">QR</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="viewer-container" id="viewer-container">
+        {% if file_type.lower() == 'pdf' %}
+        <iframe id="pdf-viewer" src="{{ file_url }}#toolbar=1&navpanes=0"
+            style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+        {% else %}
+        <img id="image-viewer" src="{{ file_url }}" alt="Hoja de rescate de {{ asset.name }}"
+            style="max-width: 100%; max-height: 100%;">
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

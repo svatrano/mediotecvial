@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Obleas de Emergencia — {{ asset.domain | upper if asset.domain else asset.name }} — Mediotec S.A.S.{% endblock %}
+
+{% block extra_css %}
+  {# Tipografías específicas de las obleas: Montserrat (texto) + Roboto Mono (código ID) #}
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+  {# html2canvas: renderiza las tarjetas HTML a imagen PNG descargable #}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+{# ── Encabezado de la página ────────────────────────────────────────────── #}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-title mb-1">
+      <i class="bi bi-printer"></i> Obleas de Emergencia
+    </h1>
+    <p class="text-muted mb-0">
+      <strong>{{ asset.name }}</strong>
+      {% if asset.domain %} — Dominio: <strong>{{ asset.domain | upper }}</strong>{% endif %}
+      {% if asset.brand %} — {{ asset.brand }} {{ asset.model_name }}{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('admin.list_assets') }}" class="btn btn-secondary" aria-label="Volver a la lista de activos">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+</div>
+
+{% if not asset.domain %}
+<div class="alert alert-warning" role="alert">
+  <i class="bi bi-exclamation-triangle"></i>
+  Este vehículo no tiene <strong>dominio/patente</strong> registrado. Completá los datos del activo para que las obleas muestren la información correcta.
+</div>
+{% endif %}
+
+<body class="obleas-page">
+
+  {# ══════════════════════════════════════════════════════════════════════
+     SECCIÓN 1: OBLEA LUNETA (VERTICAL)
+     ══════════════════════════════════════════════════════════════════════ #}
+  <div class="obleas-wrapper">
+    <div class="obleas-section-header">
+      <div class="obleas-section-title">1. Oblea Luneta (Trasera)</div>
+      <button
+        id="btn-descargar-luneta"
+        class="btn-download-oblea"
+        onclick="descargarPNG('oblea-luneta', 'Oblea_Luneta_{{ (asset.domain or asset.name) | upper | replace(' ', '_') }}.png')"
+        aria-label="Descargar oblea luneta como imagen PNG">
+        <i class="bi bi-download"></i> Descargar PNG
+      </button>
+    </div>
+
+    {# ── Tarjeta Luneta ──────────────────────────────────────────────────── #}
+    <div class="card-luneta" id="oblea-luneta" role="img" aria-label="Oblea de luneta trasera para {{ asset.domain | upper if asset.domain else asset.name }}">
+
+      <div class="oblea-header">
+        <div class="oblea-brand">
+          <img src="{{ url_for('static', filename='images/icono_2_fondo_blanco.png') }}"
+               alt="Logo Mediotec"
+               class="oblea-brand-logo">
+          <h2 class="oblea-brand-title">MEDIOTEC VIAL</h2>
+        </div>
+        <div class="oblea-badge-emergency" aria-label="Oblea de Emergencia">
+          <span aria-hidden="true">&#9888;</span> EMERGENCIA
+        </div>
+      </div>
+
+      <div class="oblea-body">
+        <div class="oblea-qr-container" aria-label="Código QR de rescate">
+          {% if qr_b64 %}
+            <img src="data:image/png;base64,{{ qr_b64 }}"
+                 alt="Código QR de rescate para {{ asset.domain | upper if asset.domain else asset.name }}">
+          {% else %}
+            <div class="oblea-qr-empty">
+              <i class="bi bi-qr-code" aria-hidden="true"></i>
+              <span>Sin QR</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="oblea-patente"
+             contenteditable="true"
+             id="patente-luneta"
+             aria-label="Patente o dominio del vehículo">{{ asset.domain | upper if asset.domain else '—' }}</div>
+      </div>
+
+      <div class="oblea-footer">
+        <div class="oblea-id-code"
+             contenteditable="true"
+             aria-label="Identificador del activo">ID: {{ asset.id[:8] | upper }}</div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════════════════════
+     SECCIÓN 2: OBLEA PARABRISAS (HORIZONTAL)
+     ══════════════════════════════════════════════════════════════════════ #}
+  <div class="obleas-wrapper">
+    <div class="obleas-section-header">
+      <div class="obleas-section-title">2. Oblea Parabrisas (Delantera)</div>
+      <button
+        id="btn-descargar-parabrisas"
+        class="btn-download-oblea"
+        onclick="descargarPNG('oblea-parabrisas', 'Oblea_Parabrisas_{{ (asset.domain or asset.name) | upper | replace(' ', '_') }}.png')"
+        aria-label="Descargar oblea parabrisas como imagen PNG">
+        <i class="bi bi-download"></i> Descargar PNG
+      </button>
+    </div>
+
+    {# ── Tarjeta Parabrisas ──────────────────────────────────────────────── #}
+    <div class="card-parabrisas" id="oblea-parabrisas" role="img" aria-label="Oblea de parabrisas delantera para {{ asset.domain | upper if asset.domain else asset.name }}">
+
+      <div class="oblea-header">
+        <div class="oblea-brand">
+          <img src="{{ url_for('static', filename='images/icono_2_fondo_blanco.png') }}"
+               alt="Logo Mediotec"
+               class="oblea-brand-logo">
+          <div class="oblea-brand-titles">
+            <span class="oblea-title-main" contenteditable="true">MEDIOTEC VIAL</span>
+            <span class="oblea-title-sub" contenteditable="true">RESCATE INTELIGENTE</span>
+          </div>
+        </div>
+        <div class="oblea-badge-emergency" aria-label="Oblea de Emergencia">
+          <span aria-hidden="true">&#9888;</span> EMERGENCIA
+        </div>
+      </div>
+
+      <div class="oblea-body">
+
+        {# Columna QR #}
+        <div class="oblea-col-qr">
+          <div class="oblea-qr-box" aria-label="Código QR de rescate">
+            {% if qr_b64 %}
+              <img src="data:image/png;base64,{{ qr_b64 }}"
+                   alt="Código QR de rescate para {{ asset.domain | upper if asset.domain else asset.name }}">
+            {% else %}
+              <div class="oblea-qr-empty">
+                <i class="bi bi-qr-code" aria-hidden="true"></i>
+                <span>Sin QR</span>
+              </div>
+            {% endif %}
+          </div>
+          <span class="oblea-qr-label" contenteditable="true">ESCANEÁ PARA RESCATE</span>
+        </div>
+
+        {# Columna de información #}
+        <div class="oblea-col-info">
+
+          <div class="oblea-domain-section">
+            <span class="oblea-domain-label" contenteditable="true">DOMINIO DEL VEHÍCULO</span>
+            <span class="oblea-domain-value"
+                  contenteditable="true"
+                  aria-label="Dominio del vehículo">{{ asset.domain | upper if asset.domain else '—' }}</span>
+          </div>
+
+          <div class="oblea-specs-row">
+            <div class="oblea-spec-pill">
+              <span class="oblea-spec-title" contenteditable="true">COMBUSTIBLE</span>
+              <span class="oblea-spec-value"
+                    contenteditable="true"
+                    aria-label="Tipo de combustible">{{ asset.additional_fuel if asset.additional_fuel else 'N/D' }}</span>
+            </div>
+          </div>
+
+          <div class="oblea-status-note" aria-live="polite">
+            <span class="oblea-status-dot" aria-hidden="true"></span>
+            <span contenteditable="true">Ficha técnica completa al escanear el QR</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="oblea-footer">
+        <div class="oblea-footer-left" contenteditable="true">PRESENTADO POR</div>
+        <div class="oblea-footer-right">
+          <span class="oblea-footer-slogan" contenteditable="true">Tu protección en cada ruta</span>
+          <span class="oblea-id-code"
+                contenteditable="true"
+                aria-label="Identificador del activo">ID: {{ asset.id[:8] | upper }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+{# ── Script de descarga en alta resolución ─────────────────────────────── #}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /**
+   * Captura un elemento HTML como imagen PNG de alta resolución (escala 3×)
+   * y lo ofrece al usuario para descargar.
+   *
+   * @param {string} idElemento   - ID del elemento a capturar
+   * @param {string} nombreArchivo - Nombre del archivo de descarga
+   */
+  function descargarPNG(idElemento, nombreArchivo) {
+    const elemento = document.getElementById(idElemento);
+    const boton = document.querySelector(`[onclick*="${idElemento}"]`);
+
+    if (!elemento) {
+      console.error('Elemento no encontrado:', idElemento);
+      return;
+    }
+
+    // Feedback visual durante la generación
+    if (boton) {
+      boton.disabled = true;
+      boton.innerHTML = '<i class="bi bi-hourglass-split"></i> Generando…';
+    }
+
+    html2canvas(elemento, {
+      scale: 3,          // Alta resolución para impresión
+      useCORS: true,     // Permite recursos cross-origin
+      backgroundColor: null,
+      logging: false
+    })
+    .then(canvas => {
+      const enlace = document.createElement('a');
+      enlace.download = nombreArchivo;
+      enlace.href = canvas.toDataURL('image/png');
+      enlace.click();
+    })
+    .catch(err => {
+      console.error('Error al generar la imagen PNG:', err);
+      alert('Ocurrió un error al generar la imagen. Por favor, intentá nuevamente.');
+    })
+    .finally(() => {
+      if (boton) {
+        boton.disabled = false;
+        boton.innerHTML = '<i class="bi bi-download"></i> Descargar PNG';
+      }
+    });
+  }
+</script>
+{% endblock %}

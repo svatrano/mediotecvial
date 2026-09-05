@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Error de Conexión - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" style="min-height: calc(100vh - 200px); display: flex; align-items: center;">
+    <div class="col-md-8 text-center">
+        <div class="mb-4 mt-4">
+            <i class="bi bi-database-fill-x text-danger" style="font-size: 5rem;"></i>
+        </div>
+        <h2 class="mb-3 font-weight-bold">Error de Conexión con la Base de Datos</h2>
+        
+        <div class="alert alert-danger text-start p-4 mb-4" style="background-color: #fdf2f2; border-left: 5px solid var(--primary-color);">
+            <h5 class="alert-heading font-weight-bold mb-3 text-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i> ¿Por qué ocurre esto?
+            </h5>
+            <p class="mb-3 text-dark">
+                La aplicación no pudo establecer conexión con el servidor Azure SQL Database. Esto suele ocurrir por las siguientes razones:
+            </p>
+            <ul class="text-dark">
+                <li class="mb-2"><strong>Contraseña o credenciales incorrectas:</strong> La contraseña configurada en el archivo <code>.env</code> (variable <code>AZURE_SQL_ADMIN_PASSWORD</code> o <code>DATABASE_URL</code>) o en las configuraciones de Azure App Service no coincide con la configurada en el servidor.</li>
+                <li class="mb-2"><strong>Pausa automática del servidor (Serverless):</strong> La base de datos es de tipo Serverless y está despertando de su suspensión automática (esto puede tardar entre 30 y 60 segundos en el primer intento).</li>
+                <li class="mb-2"><strong>Reglas de Firewall de Azure SQL:</strong> El firewall del servidor SQL está bloqueando la conexión. Asegúrate de habilitar la opción <em>"Permitir que los servicios y recursos de Azure accedan a este servidor"</em> en el portal de Azure.</li>
+            </ul>
+        </div>
+
+        {% if error_message %}
+        <div class="card text-start mb-4 border" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header bg-dark text-white py-2" style="border-bottom: 2px solid var(--secondary-color);">
+                <small class="font-weight-bold"><i class="bi bi-terminal"></i> Detalle técnico del error (SQLAlchemy / pyodbc):</small>
+            </div>
+            <div class="card-body p-3 bg-light">
+                <pre class="mb-0 text-danger" style="white-space: pre-wrap; font-size: 0.85rem; font-family: monospace;">{{ error_message }}</pre>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise"></i> Reintentar Conexión
+            </a>
+            <a href="https://portal.azure.com" target="_blank" class="btn btn-secondary">
+                <i class="bi bi-cloud-fill"></i> Ir a Azure Portal
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

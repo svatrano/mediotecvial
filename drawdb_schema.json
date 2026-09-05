@@ -1,0 +1,212 @@
+{
+  "author": "MediotecVial Core Team",
+  "title": "MediotecVial Database Schema",
+  "date": "2026-09-04",
+  "description": "Diagrama de entidad-relación del sistema MediotecVial para gestión de hojas de rescate vehicular y control de lotes QR",
+  "tables": [
+    {
+      "id": 1,
+      "name": "users",
+      "x": 40,
+      "y": 60,
+      "fields": [
+        {"id": 101, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 102, "name": "username", "type": "VARCHAR(80)", "primary": false, "unique": true, "notNull": true, "increment": false},
+        {"id": 103, "name": "email", "type": "VARCHAR(120)", "primary": false, "unique": true, "notNull": true, "increment": false},
+        {"id": 104, "name": "password_hash", "type": "VARCHAR(256)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 105, "name": "role", "type": "VARCHAR(20)", "default": "'cliente'", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 106, "name": "is_active", "type": "BOOLEAN", "default": "true", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 107, "name": "created_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 108, "name": "updated_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "clients",
+      "x": 380,
+      "y": 60,
+      "fields": [
+        {"id": 201, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 202, "name": "nombre", "type": "VARCHAR(150)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 203, "name": "dni_cuit", "type": "VARCHAR(50)", "primary": false, "unique": true, "notNull": true, "increment": false},
+        {"id": 204, "name": "direccion", "type": "VARCHAR(255)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 205, "name": "telefono", "type": "VARCHAR(50)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 206, "name": "mail", "type": "VARCHAR(120)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 207, "name": "user_id", "type": "INTEGER", "primary": false, "unique": true, "notNull": true, "increment": false},
+        {"id": 208, "name": "created_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "fuel_type",
+      "x": 40,
+      "y": 420,
+      "fields": [
+        {"id": 301, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 302, "name": "tipo", "type": "VARCHAR(50)", "primary": false, "unique": true, "notNull": true, "increment": false},
+        {"id": 303, "name": "descripcion", "type": "TEXT", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Vehicle_templates",
+      "x": 750,
+      "y": 420,
+      "fields": [
+        {"id": 401, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 402, "name": "brand", "type": "VARCHAR(100)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 403, "name": "model", "type": "VARCHAR(100)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 404, "name": "year", "type": "INTEGER", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 405, "name": "rescue_sheet_url", "type": "VARCHAR(500)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 406, "name": "rescue_sheet_filename", "type": "VARCHAR(255)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 407, "name": "created_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "assets",
+      "x": 380,
+      "y": 400,
+      "fields": [
+        {"id": 501, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 502, "name": "client_id", "type": "INTEGER", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 503, "name": "asset_type", "type": "VARCHAR(50)", "default": "'vehicle'", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 504, "name": "name", "type": "VARCHAR(150)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 505, "name": "address_or_model", "type": "VARCHAR(255)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 506, "name": "domain", "type": "VARCHAR(20)", "primary": false, "unique": true, "notNull": false, "increment": false},
+        {"id": 507, "name": "manufacturing_year", "type": "INTEGER", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 508, "name": "vehicle_template_id", "type": "INTEGER", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 509, "name": "fuel_type_id", "type": "INTEGER", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 510, "name": "description", "type": "TEXT", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 511, "name": "created_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 512, "name": "updated_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    },
+    {
+      "id": 6,
+      "name": "CodigoQR",
+      "x": 380,
+      "y": 850,
+      "fields": [
+        {"id": 601, "name": "id", "type": "VARCHAR(36)", "primary": true, "unique": true, "notNull": true, "increment": false},
+        {"id": 602, "name": "lote_impresion", "type": "VARCHAR(50)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 603, "name": "estado", "type": "VARCHAR(20)", "default": "'VIRGEN'", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 604, "name": "fecha_generacion", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 605, "name": "activo_id", "type": "INTEGER", "primary": false, "unique": true, "notNull": false, "increment": false}
+      ]
+    },
+    {
+      "id": 7,
+      "name": "solicitudes_vehiculo_faltante",
+      "x": 750,
+      "y": 60,
+      "fields": [
+        {"id": 701, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 702, "name": "client_id", "type": "INTEGER", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 703, "name": "marca", "type": "VARCHAR(100)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 704, "name": "modelo", "type": "VARCHAR(100)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 705, "name": "anio", "type": "INTEGER", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 706, "name": "contacto", "type": "VARCHAR(150)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 707, "name": "observaciones", "type": "TEXT", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 708, "name": "estado", "type": "VARCHAR(20)", "default": "'PENDIENTE'", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 709, "name": "fecha_creacion", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    },
+    {
+      "id": 8,
+      "name": "emergency_plans",
+      "x": 40,
+      "y": 850,
+      "fields": [
+        {"id": 801, "name": "id", "type": "INTEGER", "primary": true, "unique": true, "notNull": true, "increment": true},
+        {"id": 802, "name": "asset_id", "type": "INTEGER", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 803, "name": "file_name", "type": "VARCHAR(255)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 804, "name": "file_path", "type": "VARCHAR(500)", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 805, "name": "file_size", "type": "INTEGER", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 806, "name": "file_type", "type": "VARCHAR(50)", "primary": false, "unique": false, "notNull": false, "increment": false},
+        {"id": 807, "name": "version", "type": "INTEGER", "default": "1", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 808, "name": "is_active", "type": "BOOLEAN", "default": "true", "primary": false, "unique": false, "notNull": true, "increment": false},
+        {"id": 809, "name": "created_at", "type": "DATETIME", "primary": false, "unique": false, "notNull": true, "increment": false}
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": 1,
+      "name": "fk_clients_users",
+      "startTableId": 2,
+      "startFieldId": 207,
+      "endTableId": 1,
+      "endFieldId": 101,
+      "cardinality": "one_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Cascade"
+    },
+    {
+      "id": 2,
+      "name": "fk_assets_clients",
+      "startTableId": 5,
+      "startFieldId": 502,
+      "endTableId": 2,
+      "endFieldId": 201,
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Cascade"
+    },
+    {
+      "id": 3,
+      "name": "fk_assets_vehicle_templates",
+      "startTableId": 5,
+      "startFieldId": 508,
+      "endTableId": 4,
+      "endFieldId": 401,
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Set null"
+    },
+    {
+      "id": 4,
+      "name": "fk_assets_fuel_type",
+      "startTableId": 5,
+      "startFieldId": 509,
+      "endTableId": 3,
+      "endFieldId": 301,
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Set null"
+    },
+    {
+      "id": 5,
+      "name": "fk_codigoqr_assets",
+      "startTableId": 6,
+      "startFieldId": 605,
+      "endTableId": 5,
+      "endFieldId": 501,
+      "cardinality": "one_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Set null"
+    },
+    {
+      "id": 6,
+      "name": "fk_solicitudes_clients",
+      "startTableId": 7,
+      "startFieldId": 702,
+      "endTableId": 2,
+      "endFieldId": 201,
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Set null"
+    },
+    {
+      "id": 7,
+      "name": "fk_emergency_plans_assets",
+      "startTableId": 8,
+      "startFieldId": 802,
+      "endTableId": 5,
+      "endFieldId": 501,
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "Cascade"
+    }
+  ]
+}

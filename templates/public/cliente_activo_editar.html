@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Vehículo: {{ asset.domain }} - Mediotec Vial{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="page-title mb-0">
+                <i class="bi bi-pencil-square text-primary"></i> Actualizar Datos del Vehículo
+            </h1>
+            <a href="{{ url_for('activos.mis_activos') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Volver
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white p-3">
+                <h5 class="mb-0">
+                    {{ asset.brand }} {{ asset.model_name }}
+                    <span class="badge bg-danger font-monospace ms-2">{{ asset.domain }}</span>
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Patente / Dominio</label>
+                        <input type="text" class="form-control font-monospace" value="{{ asset.domain }}" disabled>
+                        <small class="text-muted">El dominio está vinculado al código QR de la unidad y no puede modificarse directamente.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="manufacturing_year" class="form-label fw-bold">Año de Fabricación</label>
+                        <input type="number" class="form-control" id="manufacturing_year" name="manufacturing_year"
+                               value="{{ asset.manufacturing_year }}" min="1950" max="2030">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fuel_type_id" class="form-label fw-bold">Tipo de Combustible / Propulsión</label>
+                        <select class="form-select form-select-lg" id="fuel_type_id" name="fuel_type_id" required>
+                            {% for f in fuel_types %}
+                            <option value="{{ f.id }}" {% if asset.fuel_type_id == f.id %}selected{% endif %}>
+                                {{ f.tipo }} - {{ f.descripcion[:50] }}...
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Mantén este dato actualizado para los rescatistas de emergencia.</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-bold">Observaciones del Vehículo</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ asset.description or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

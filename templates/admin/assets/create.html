@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Activo - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="page-title mb-4">
+            <i class="bi bi-plus-circle"></i> Crear Nuevo Activo
+        </h1>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.create_asset') }}" id="createAssetForm">
+                    <div class="mb-3">
+                        <label for="client_id" class="form-label fw-bold">Cliente <span class="text-danger">*</span></label>
+                        <select class="form-select" id="client_id" name="client_id" required>
+                            <option value="">-- Selecciona un cliente --</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="asset_type" class="form-label fw-bold">Tipo de Activo <span class="text-danger">*</span></label>
+                        <select class="form-select" id="asset_type" name="asset_type" required onchange="toggleFields()">
+                            <option value="vehicle" selected>Vehículo</option>
+                            <option value="building">Edificio</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Nombre del Activo <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Ej: Ambulancia A-01 / Polo de Flota" required>
+                    </div>
+
+                    <!-- Campos específicos para Edificio -->
+                    <div id="building_fields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="address_or_model" class="form-label fw-bold">Dirección del Edificio <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="address_or_model" name="address_or_model" placeholder="Ej: Av. Corrientes 1234, CABA">
+                        </div>
+                    </div>
+
+                    <!-- Campos específicos para Vehículo (Usando catálogo de plantillas) -->
+                    <div id="vehicle_fields">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="vehicle_template_id" class="form-label fw-bold mb-0">Modelo de Vehículo (Catálogo) <span class="text-danger">*</span></label>
+                                <a href="{{ url_for('admin.list_vehicle_templates') }}" target="_blank" class="small text-decoration-none">
+                                    <i class="bi bi-plus-circle me-1"></i>Gestionar Catálogo
+                                </a>
+                            </div>
+                            <select class="form-select" id="vehicle_template_id" name="vehicle_template_id">
+                                <option value="">-- Selecciona un Modelo del Catálogo (Marca - Modelo - Año Modelo) --</option>
+                                {% for template in vehicle_templates %}
+                                <option value="{{ template.id }}">
+                                    {{ template.brand }} - {{ template.model }} (Año modelo: {{ template.year }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">La hoja de rescate se vinculará automáticamente desde la plantilla seleccionada.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="manufacturing_year" class="form-label fw-bold">Año de Fabricación <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="manufacturing_year" name="manufacturing_year" placeholder="Ej: 2024" min="1900" max="2100">
+                                <small class="text-muted">Año exacto de fabricación de esta unidad</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="domain" class="form-label fw-bold">Dominio / Patente <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control text-uppercase" id="domain" name="domain" placeholder="Ej: AB123CD" oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fuel_type_id" class="form-label fw-bold">Tipo de Combustible / Propulsión</label>
+                            <select class="form-select" id="fuel_type_id" name="fuel_type_id">
+                                <option value="">-- Selecciona combustible --</option>
+                                {% for f in fuel_types %}
+                                <option value="{{ f.id }}">{{ f.tipo }} - {{ f.descripcion[:45] }}...</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-bold">Descripción / Observaciones</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Información adicional sobre el activo"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-1"></i> Crear Activo
+                        </button>
+                        <a href="{{ url_for('admin.list_assets') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleFields() {
+        const assetType = document.getElementById('asset_type').value;
+        const buildingFields = document.getElementById('building_fields');
+        const vehicleFields = document.getElementById('vehicle_fields');
+        const addressInput = document.getElementById('address_or_model');
+        const templateInput = document.getElementById('vehicle_template_id');
+        const mfgYearInput = document.getElementById('manufacturing_year');
+        const domainInput = document.getElementById('domain');
+
+        if (assetType === 'building') {
+            buildingFields.style.display = 'block';
+            vehicleFields.style.display = 'none';
+            addressInput.required = true;
+            templateInput.required = false;
+            mfgYearInput.required = false;
+            domainInput.required = false;
+        } else {
+            buildingFields.style.display = 'none';
+            vehicleFields.style.display = 'block';
+            addressInput.required = false;
+            addressInput.value = '';
+            templateInput.required = true;
+            mfgYearInput.required = true;
+            domainInput.required = true;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', toggleFields);
+</script>
+{% endblock %}

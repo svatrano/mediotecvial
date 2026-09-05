@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{{ asset.name }} - Firewatch Emergencia{% endblock %}
+
+
+
+{% block content %}
+<div class="view-plan-page">
+<div class="asset-info">
+    <h5>
+        <i class="bi bi-exclamation-circle"></i> {{ asset.name }}
+        {% if asset.additional_fuel %}
+        <span class="badge bg-danger ms-2 text-uppercase" style="font-size: 0.7em; vertical-align: middle;">
+            <i class="bi bi-fire"></i> {{ asset.additional_fuel }}
+        </span>
+        {% endif %}
+    </h5>
+    <p>
+        <strong>Versión del Plano:</strong> v{{ plan.version }}
+        | <strong>Tipo:</strong>
+        {% if asset.asset_type == 'building' %}
+            Edificio | <strong>Dirección:</strong> {{ asset.address_or_model }}
+        {% else %}
+            Vehículo | <strong>Vehículo:</strong> {{ asset.brand }} {{ asset.model_name }} ({{ asset.manufacturing_year }})
+            | <strong>Dominio:</strong> {{ asset.domain }}
+            {% if asset.client.id_type and asset.client.id_number %}
+            | <strong>Titular:</strong> {{ asset.client.id_type }} {{ asset.client.id_number }}
+            {% endif %}
+        {% endif %}
+    </p>
+</div>
+
+<div class="controls-bar">
+    <h6 class="mb-0">
+        <i class="bi bi-file-pdf"></i> {{ plan.file_name }}
+    </h6>
+
+    <div class="zoom-controls">
+        <button type="button" class="btn btn-emergency btn-sm" id="btn-zoom-out" title="Zoom Menos">
+            <i class="bi bi-zoom-out"></i>
+        </button>
+        <button type="button" class="btn btn-emergency btn-sm" id="btn-reset-zoom" title="Zoom Original">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <button type="button" class="btn btn-emergency btn-sm" id="btn-zoom-in" title="Zoom Más">
+            <i class="bi bi-zoom-in"></i>
+        </button>
+    </div>
+
+    <div>
+        <a href="{{ url_for('emergency.download_plan', plan_id=plan.id) }}" class="btn btn-emergency btn-sm" title="Descargar">
+            <i class="bi bi-download"></i> <span class="d-none d-md-inline">Descargar</span>
+        </a>
+    </div>
+</div>
+
+<div class="viewer-container" id="viewer-container">
+    {% if file_type.lower() == 'pdf' %}
+        <iframe
+            id="pdf-viewer"
+            src="{{ file_url }}#toolbar=1&navpanes=0"
+            style="width: 100%; height: 100%; border: none;"
+            allowfullscreen
+        ></iframe>
+    {% else %}
+        <img
+            id="image-viewer"
+            src="{{ file_url }}"
+            alt="Plano de {{ asset.name }}"
+            style="max-width: 100%; max-height: 100%;"
+        >
+    {% endif %}
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const viewer = document.getElementById('viewer-container');
+        const imageViewer = document.getElementById('image-viewer');
+        let currentZoom = 1;
+
+        // Solo aplicar zoom si es una imagen
+        if (imageViewer) {
+            const zoomInBtn = document.getElementById('btn-zoom-in');
+            const zoomOutBtn = document.getElementById('btn-zoom-out');
+            const resetZoomBtn = document.getElementById('btn-reset-zoom');
+
+            const applyZoom = () => {
+                imageViewer.style.transform = `scale(${currentZoom})`;
+                imageViewer.style.cursor = currentZoom > 1 ? 'grab' : 'auto';
+            };
+
+            zoomInBtn.addEventListener('click', () => {
+                currentZoom = Math.min(currentZoom + 0.2, 3);
+                applyZoom();
+            });
+
+            zoomOutBtn.addEventListener('click', () => {
+                currentZoom = Math.max(currentZoom - 0.2, 1);
+                applyZoom();
+            });
+
+            resetZoomBtn.addEventListener('click', () => {
+                currentZoom = 1;
+                applyZoom();
+            });
+
+            // Zoom con rueda del ratón (solo en desktop)
+            viewer.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    currentZoom = Math.max(1, Math.min(3, currentZoom + delta));
+                    applyZoom();
+                }
+            });
+
+            // Mantener la página en la parte superior al cargar
+            window.scrollTo(0, 0);
+        }
+
+        // Registrar visualización en el servidor
+        console.log('Plano visualizado: {{ plan.id }}');
+    });
+
+    // Prevenir que se cierre accidentalmente
+    window.addEventListener('beforeunload', function(e) {
+        // Opcional: mostrar confirmación si el usuario intenta salir
+        // e.preventDefault();
+        // e.returnValue = '';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Mediotec Vial | QRs para hojas de Rescate Vehicular{% endblock %}
+
+{% block content %}
+<section class="public-hero" aria-labelledby="hero-title">
+    <div class="hero-grid container-main">
+        <div class="hero-copy">
+            <p class="hero-tag">Mediotec Vial</p>
+            <h1 id="hero-title">Hojas de Rescate Vehicular para intervenciones más seguras y rápidas</h1>
+            <p class="hero-text">
+                Nuestros códigos QR ponen a disposición las hojas de rescate de los vehículos para ser utilizadas por
+                equipos de rescate, como cuerpos de bomberos o personal médico, para obtener detalles específicos sobre
+                la estructura y características de un vehículo con el fin de llevar a cabo operaciones de rescate de
+                manera segura y eficiente.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}">Iniciar Sesión</a>
+                <a class="btn btn-secondary btn-lg" href="{{ url_for('faq') }}">Ver Preguntas Frecuentes</a>
+            </div>
+        </div>
+        <div class="hero-image" aria-hidden="true">
+            <img src="{{ url_for('static', filename='images/logo_2_fondo_blanco.png') }}" alt="Logo Mediotec Vial" />
+        </div>
+    </div>
+</section>
+
+<section class="public-section">
+    <header class="section-header">
+        <p class="eyebrow">Hoja de Rescate Vehicular</p>
+        <h2>Claridad inmediata para el accionar de equipos de rescate en accidentes graves</h2>
+        <p class="section-lead"> Las Hojas de Rescate Vehicular que disponibiliza <strong>Mediotec Vial</strong> son una
+            guía visual pensada para los bomberos y técnicos que actúan en situaciones de alto riesgo. Localiza
+            rápidamente los elementos que determinan la extracción segura del ocupante y que reducen los riegos de
+            accidentes durante las intervenciones.</p>
+    </header>
+
+    <div class="feature-grid">
+        <article class="feature-card">
+            <h3>Identificación de airbags</h3>
+            <p>Localiza los sistemas de inflado y evita activaciones accidentales durante la intervención.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Zonas de corte seguras</h3>
+            <p>Señala los puntos estructurales adecuados para cortar con tecnología hidráulica sin comprometer la célula
+                de supervivencia.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Desconexión de baterías</h3>
+            <p>Reduce el riesgo eléctrico especialmente en vehículos eléctricos e híbridos, indicando la posición de los
+                componentes críticos.</p>
+        </article>
+    </div>
+</section>
+
+<section class="public-section public-section--alt">
+    <div class="info-panel">
+        <h2>¿Por qué la hoja de rescate salva vidas?</h2>
+        <ul class="info-list">
+            <li>Permite a bomberos actuar con velocidad sin perder precisión.</li>
+            <li>Reduce el tiempo de rescate y la exposición a condiciones peligrosas.</li>
+            <li>Reduce el riesgo de accidentes al interactuar con generadores de gas de airbag, circuitos eléctricos y
+                otros componentes críticos.</li>
+        </ul>
+    </div>
+    <div class="info-panel">
+        <h2>¿Qué marca y por qué?</h2>
+        <p>La hoja incluye información del vehículo sobre la localización de los refuerzos en la cabina, depósito de
+            combustible, baterías, airbags, generadores de gas, unidades de control, etc., indicando las zonas de corte
+            adecuadas. Algunos fabricantes o importadores han hecho pública estas hojas, pero no suelen estar a mano en
+            el momento más crítico. Para que los equipos de rescate puedan tener un acceso rápido a la Hoja de Rescate,
+            <strong>Mediotec Vial</strong> ofrece una solución digital accesible en cualquier momento.</p>
+    </div>
+</section>
+
+<section class="public-section">
+    <article class="callout-card">
+        <h2>Intervenciones más rápidas, vidas mejor protegidas.</h2>
+        <p>En emergencias, cada segundo cuenta. <strong>Mediotec Vial</strong> entrega una hoja de rescate diseñada para
+            que los equipos lleguen a la solución correcta desde el primer momento.</p>
+        <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Acceder al sistema</a>
+    </article>
+</section>
+{% endblock %}

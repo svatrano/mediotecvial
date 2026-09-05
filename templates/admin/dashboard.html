@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - Mediotec Vial{% endblock %}
+
+{% block content %}
+<h1 class="page-title mb-4">
+    <i class="bi bi-speedometer2"></i> Dashboard de Administración
+</h1>
+
+<!-- Bloque Destacado: Gestión de Lotes QR (Requerimiento Principal) -->
+<div class="card shadow-sm mb-4 border-primary" style="border-left: 5px solid var(--primary-color);">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-danger text-uppercase px-2 py-1">
+                        <i class="bi bi-qr-code-scan"></i> Control Físico
+                    </span>
+                    <h4 class="mb-0 fw-bold" style="color: var(--dark-blue);">Gestión de Lotes QR</h4>
+                </div>
+                <p class="text-muted mb-0">Control en tiempo real de códigos QR generados, disponibles para imprenta y activados en vehículos.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('admin_qr.gestion_qrs') }}" class="btn btn-primary btn-lg shadow-sm">
+                    <i class="bi bi-qr-code me-2"></i> Administrar Lotes QR
+                </a>
+            </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="row g-3 text-center">
+            <div class="col-md-4 col-sm-12">
+                <div class="p-3 bg-light rounded border">
+                    <p class="text-muted small text-uppercase mb-1 fw-bold">Total QRs Impresos</p>
+                    <h2 class="display-6 fw-bold mb-0 text-dark">{{ total_qrs }}</h2>
+                    <small class="text-muted">Generados en el sistema</small>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="p-3 bg-light rounded border border-warning">
+                    <p class="text-warning small text-uppercase mb-1 fw-bold">
+                        <i class="bi bi-hourglass-split"></i> Vírgenes Disponibles
+                    </p>
+                    <h2 class="display-6 fw-bold mb-0 text-warning">{{ virgenes_disponibles }}</h2>
+                    <small class="text-muted">Listos para vincular</small>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="p-3 bg-light rounded border border-success">
+                    <p class="text-success small text-uppercase mb-1 fw-bold">
+                        <i class="bi bi-check-circle-fill"></i> QRs Activados
+                    </p>
+                    <h2 class="display-6 fw-bold mb-0 text-success">{{ qrs_activados }}</h2>
+                    <small class="text-muted">Con vehículos asociados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de estadísticas generales -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="bi bi-people" style="font-size: 2rem; color: #007bff;"></i>
+                <h5 class="card-title mt-3">Usuarios</h5>
+                <p class="card-text display-6 fw-bold">{{ total_users }}</p>
+                <a href="{{ url_for('admin.list_users') }}" class="btn btn-sm btn-outline-primary">
+                    Ver Listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="bi bi-building" style="font-size: 2rem; color: #28a745;"></i>
+                <h5 class="card-title mt-3">Clientes</h5>
+                <p class="card-text display-6 fw-bold">{{ total_clients }}</p>
+                <a href="{{ url_for('admin.list_clients') }}" class="btn btn-sm btn-outline-success">
+                    Ver Listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="bi bi-car-front" style="font-size: 2rem; color: #ffc107;"></i>
+                <h5 class="card-title mt-3">Activos</h5>
+                <p class="card-text display-6 fw-bold">{{ total_assets }}</p>
+                <a href="{{ url_for('admin.list_assets') }}" class="btn btn-sm btn-outline-warning">
+                    Ver Listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="bi bi-file-earmark-medical" style="font-size: 2rem; color: #dc3545;"></i>
+                <h5 class="card-title mt-3">Catálogo</h5>
+                <p class="card-text display-6 fw-bold">{{ total_templates }}</p>
+                <a href="{{ url_for('admin.list_vehicle_templates') }}" class="btn btn-sm btn-outline-danger">
+                    Ver Modelos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row mt-2">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning text-warning"></i> Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_qr.gestion_qrs') }}" class="btn btn-outline-danger text-start">
+                        <i class="bi bi-qr-code-scan me-2"></i> Generar Lote de Códigos QR
+                    </a>
+                    <a href="{{ url_for('admin.create_asset') }}" class="btn btn-outline-warning text-start">
+                        <i class="bi bi-plus-circle me-2"></i> Crear Activo Vehicular Interno
+                    </a>
+                    <a href="{{ url_for('admin.create_client') }}" class="btn btn-outline-success text-start">
+                        <i class="bi bi-building me-2"></i> Crear Cliente Nuevo
+                    </a>
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-person-plus me-2"></i> Crear Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle text-info"></i> Información del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Aplicación:</strong> {{ app_name }} (v{{ app_version }})</p>
+                <p class="mb-2"><strong>Usuario:</strong> {{ current_user.username }}</p>
+                <p class="mb-2"><strong>Rol:</strong> <span class="badge bg-primary text-uppercase">{{ current_user.role }}</span></p>
+                <p class="mb-3"><strong>Fecha/Hora Servidor:</strong> {{ current_year }}</p>
+                <a href="{{ url_for('auth.profile') }}" class="btn btn-sm btn-secondary">
+                    <i class="bi bi-person"></i> Mi Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

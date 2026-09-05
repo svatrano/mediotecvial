@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Activación de Código QR - Mediotec Vial{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8 col-md-10">
+        <div class="card shadow border-0">
+            <!-- Header con Branding y Estado del QR -->
+            <div class="card-header bg-dark text-white p-4 text-center position-relative">
+                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-3 py-2 fw-bold">
+                    <i class="bi bi-tag-fill me-1"></i> Lote: {{ qr.lote_impresion }}
+                </span>
+                <img src="{{ url_for('static', filename='images/icono_2_fondo_blanco.png') }}" alt="Mediotec Logo"
+                     style="height: 60px; background-color: var(--dark-blue); padding: 5px; border-radius: 8px; margin-bottom: 12px;">
+                <h2 class="h3 mb-1 text-white fw-bold">Activación de Código QR</h2>
+                <p class="text-light opacity-75 mb-0 small">
+                    Asocia este código físico a tu vehículo para habilitar la Hoja de Rescate de emergencia.
+                </p>
+                <div class="mt-2 font-monospace small text-warning bg-black bg-opacity-25 py-1 px-3 d-inline-block rounded">
+                    UUID: {{ qr.id }}
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('qr_router.activar_qr', qr_uuid=qr.id) }}" id="activacionForm">
+                    <!-- Patente / Dominio -->
+                    <div class="mb-4">
+                        <label for="domain" class="form-label fw-bold">
+                            Dominio / Patente del Vehículo <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text"><i class="bi bi-car-front-fill"></i></span>
+                            <input type="text" class="form-control text-uppercase font-monospace fw-bold"
+                                   id="domain" name="domain" placeholder="Ej: AB123CD o AA123BB"
+                                   value="{{ form_data.get('domain', '') }}" required
+                                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+                        </div>
+                        <small class="text-muted">Formato estándar de patente sin guiones ni espacios.</small>
+                    </div>
+
+                    <!-- Marca y Modelo (Catálogo Dinámico) -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="brand" class="form-label fw-bold">
+                                Marca del Vehículo <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="brand" name="brand" required onchange="cargarModelos(this.value)">
+                                <option value="">-- Selecciona Marca --</option>
+                                {% for b in brands %}
+                                <option value="{{ b }}" {% if form_data.get('brand') == b %}selected{% endif %}>{{ b }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="model" class="form-label fw-bold">
+                                Modelo <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="model" name="model" required>
+                                <option value="">-- Selecciona primero la marca --</option>
+                                {% if form_data.get('model') %}
+                                <option value="{{ form_data.get('model') }}" selected>{{ form_data.get('model') }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Link para solicitar modelo faltante -->
+                    <div class="mb-4 text-end">
+                        <a href="javascript:void(0)" class="small text-decoration-none text-danger" onclick="abrirModalSolicitud()">
+                            <i class="bi bi-question-circle me-1"></i>¿No encuentras tu modelo de vehículo en el catálogo?
+                        </a>
+                    </div>
+
+                    <!-- Año de Fabricación y Tipo de Combustible -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-5">
+                            <label for="manufacturing_year" class="form-label fw-bold">
+                                Año de Fabricación <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control form-control-lg font-monospace"
+                                   id="manufacturing_year" name="manufacturing_year" min="1950" max="2030"
+                                   value="{{ form_data.get('manufacturing_year', 2023) }}" placeholder="Ej: 2023" required>
+                            <small class="text-muted">Año exacto del modelo.</small>
+                        </div>
+                        <div class="col-md-7">
+                            <label for="fuel_type_id" class="form-label fw-bold">
+                                Tipo de Combustible / Propulsión <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="fuel_type_id" name="fuel_type_id" required>
+                                <option value="">-- Seleccione combustible --</option>
+                                {% for f in fuel_types %}
+                                <option value="{{ f.id }}" {% if form_data.get('fuel_type_id')|string == f.id|string %}selected{% endif %}>
+                                    {{ f.tipo }} - {{ f.descripcion[:45] }}...
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Dato vital para los protocolos de corte y extinción de bomberos.</small>
+                        </div>
+                    </div>
+
+                    <!-- Si es admin, puede elegir el cliente -->
+                    {% if current_user.role == 'admin' %}
+                    <div class="mb-4 p-3 bg-light rounded border">
+                        <label for="client_id" class="form-label fw-bold text-primary">
+                            <i class="bi bi-shield-lock me-1"></i> Asignar a Cliente (Modo Administrador)
+                        </label>
+                        <select class="form-select" id="client_id" name="client_id">
+                            <option value="">-- Asociar a mi cuenta de administrador --</option>
+                            {% if current_user.client %}
+                            <option value="{{ current_user.client.id }}" selected>{{ current_user.client.nombre }} (Mi Cliente)</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <!-- Observaciones adicionales -->
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-bold">Observaciones del Vehículo <span class="text-muted">(Opcional)</span></label>
+                        <textarea class="form-control" id="description" name="description" rows="2"
+                                  placeholder="Ej: Unidad de flota comercial, adaptaciones especiales, etc.">{{ form_data.get('description', '') }}</textarea>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">
+                            <i class="bi bi-check-circle-fill me-2"></i> Activar y Generar Hoja de Rescate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Solicitar Vehículo Faltante -->
+<div class="modal fade" id="modalSolicitud" tabindex="-1" aria-labelledby="modalSolicitudLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalSolicitudLabel">
+                    <i class="bi bi-truck me-2"></i> Reportar Modelo Faltante
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small">
+                    Si la marca o el modelo de tu vehículo no figura en el catálogo, ingresa los datos a continuación para que nuestro equipo técnico cargue la Hoja de Rescate oficial correspondiente.
+                </p>
+                <form id="formSolicitudFaltante">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Marca</label>
+                        <input type="text" class="form-control" id="solicitud_marca" required placeholder="Ej: Chery, Haval, DS...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modelo</label>
+                        <input type="text" class="form-control" id="solicitud_modelo" required placeholder="Ej: Tiggo 4, Jolion...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Año aproximado</label>
+                        <input type="number" class="form-control" id="solicitud_anio" placeholder="Ej: 2023">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Correo de Contacto</label>
+                        <input type="email" class="form-control" id="solicitud_contacto" value="{{ current_user.email if current_user.is_authenticated else '' }}" placeholder="contacto@cliente.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" id="solicitud_observaciones" rows="2" placeholder="Detalles de motorización, versión..."></textarea>
+                    </div>
+                    <div id="solicitudAlerta" class="alert d-none"></div>
+                    <button type="button" class="btn btn-primary w-100" onclick="enviarSolicitudFaltante()">
+                        Enviar Solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cargarModelos(brand) {
+    const modelSelect = document.getElementById('model');
+    modelSelect.innerHTML = '<option value="">Cargando modelos...</option>';
+
+    if (!brand) {
+        modelSelect.innerHTML = '<option value="">-- Selecciona primero la marca --</option>';
+        return;
+    }
+
+    fetch(`/api/vehiculos/modelos?brand=${encodeURIComponent(brand)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.modelos.length > 0) {
+                modelSelect.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
+                data.modelos.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    modelSelect.appendChild(opt);
+                });
+            } else {
+                modelSelect.innerHTML = '<option value="">No hay modelos cargados</option>';
+            }
+        })
+        .catch(err => {
+            console.error('Error al cargar modelos:', err);
+            modelSelect.innerHTML = '<option value="">Error al cargar modelos</option>';
+        });
+}
+
+function abrirModalSolicitud() {
+    const marcaActual = document.getElementById('brand').value;
+    if (marcaActual) {
+        document.getElementById('solicitud_marca').value = marcaActual;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('modalSolicitud'));
+    modal.show();
+}
+
+function enviarSolicitudFaltante() {
+    const marca = document.getElementById('solicitud_marca').value.trim();
+    const modelo = document.getElementById('solicitud_modelo').value.trim();
+    const anio = document.getElementById('solicitud_anio').value;
+    const contacto = document.getElementById('solicitud_contacto').value.trim();
+    const observaciones = document.getElementById('solicitud_observaciones').value.trim();
+    const alerta = document.getElementById('solicitudAlerta');
+
+    if (!marca || !modelo) {
+        alerta.className = 'alert alert-danger';
+        alerta.textContent = 'Marca y modelo son obligatorios.';
+        alerta.classList.remove('d-none');
+        return;
+    }
+
+    fetch('/api/vehiculos/solicitud-faltante', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ marca, modelo, anio, contacto, observaciones })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alerta.className = 'alert alert-success';
+            alerta.textContent = data.message;
+            alerta.classList.remove('d-none');
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('modalSolicitud')).hide();
+            }, 2500);
+        } else {
+            alerta.className = 'alert alert-danger';
+            alerta.textContent = data.error || 'Error al enviar solicitud';
+            alerta.classList.remove('d-none');
+        }
+    })
+    .catch(err => {
+        alerta.className = 'alert alert-danger';
+        alerta.textContent = 'Error de conexión con el servidor.';
+        alerta.classList.remove('d-none');
+    });
+}
+</script>
+{% endblock %}

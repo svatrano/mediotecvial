@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="page-title">
+            <i class="bi bi-person-circle"></i> Mi Perfil
+        </h1>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Información de Cuenta</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label fw-bold">Usuario:</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label fw-bold">Email:</label>
+                    <div class="col-sm-9">
+                        <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label fw-bold">Rol:</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" value="
+                            {% if user.role == 'admin' %}
+                                Administrador
+                            {% elif user.role == 'firefighter' %}
+                                Bombero
+                            {% else %}
+                                Cliente
+                            {% endif %}
+                        " disabled>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label fw-bold">Estado:</label>
+                    <div class="col-sm-9">
+                        {% if user.is_active %}
+                        <span class="badge bg-success">Activo</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label fw-bold">Miembro desde:</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" value="{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}"
+                            disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <a href="{{ url_for('auth.change_password') }}" class="btn btn-warning btn-lg">
+                <i class="bi bi-key"></i> Cambiar Contraseña
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-lg">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

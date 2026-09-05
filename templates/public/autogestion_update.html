@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Actualizar Combustible - Firewatch{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="page-title text-center">
+            <i class="bi bi-fuel-pump"></i> Actualización de Datos
+        </h1>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información del Vehículo</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <p class="mb-1"><strong>Vehículo:</strong> {{ asset.name }}</p>
+                        <p class="mb-1"><strong>Marca/Modelo:</strong> {{ asset.brand }} {{ asset.model_name }} ({{ asset.manufacturing_year }})</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="mb-1"><strong>Dominio (Patente):</strong> <span class="badge bg-secondary">{{ asset.domain }}</span></p>
+                        <p class="mb-1"><strong>Documento Propietario:</strong> {{ asset.client.id_type }} {{ asset.client.id_number }}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-3 text-center">
+                    {% if asset.vehicle_template and asset.vehicle_template.rescue_sheet_url %}
+                    <a href="{{ url_for('emergency.view_vehicle_rescue_sheet', asset_id=asset.id) }}" target="_blank" class="btn btn-outline-info">
+                        <i class="bi bi-file-pdf"></i> Ver Hoja de Rescate Asociada
+                    </a>
+                    {% else %}
+                    <span class="text-muted"><i class="bi bi-exclamation-triangle"></i> No hay hoja de rescate activa.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Actualizar Combustible Adicional</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Importante:</strong> Esta información es vital para los equipos de rescate en caso de emergencia. Mantenga este dato actualizado.
+                </div>
+
+                <form method="POST" action="{{ url_for('emergency.public_autogestion_update', asset_id=asset.id) }}">
+                    <div class="mb-4">
+                        <label for="additional_fuel" class="form-label fw-bold">Seleccione si el vehículo cuenta con combustible adicional:</label>
+                        <select class="form-select form-select-lg" id="additional_fuel" name="additional_fuel">
+                            <option value="" {% if not asset.additional_fuel or asset.additional_fuel == 'No informado' %}selected{% endif %}>No informado</option>
+                            <option value="Nafta" {% if asset.additional_fuel == 'Nafta' %}selected{% endif %}>Nafta</option>
+                            <option value="Gasoil" {% if asset.additional_fuel == 'Gasoil' %}selected{% endif %}>Gasoil</option>
+                            <option value="Gas" {% if asset.additional_fuel == 'Gas' %}selected{% endif %}>Gas (GNC / GLP)</option>
+                            <option value="Nitro" {% if asset.additional_fuel == 'Nitro' %}selected{% endif %}>Nitro</option>
+                            <option value="Batería adicional" {% if asset.additional_fuel == 'Batería adicional' %}selected{% endif %}>Batería adicional (No de fábrica)</option>
+                            <option value="Híbrido" {% if asset.additional_fuel in ['Híbrido', 'Hybrido'] %}selected{% endif %}>Híbrido</option>
+                            <option value="Eléctrico" {% if asset.additional_fuel in ['Eléctrico', 'Electrico'] %}selected{% endif %}>Eléctrico</option>
+                            <option value="Eléctrico / Híbrido" {% if asset.additional_fuel in ['Eléctrico / Híbrido', 'Híbrido / Eléctrico', 'electrico Hibrido', 'Electrico Hibrido'] %}selected{% endif %}>Eléctrico / Híbrido</option>
+                            <option value="OTRO" {% if asset.additional_fuel == 'OTRO' %}selected{% endif %}>OTRO</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-save"></i> Guardar y Finalizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

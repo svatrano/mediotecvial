@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar Planos - Firewatch{% endblock %}
+
+{% block content %}
+<h1 class="page-title">
+    <i class="bi bi-search"></i> Buscar Planos
+</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('emergency.search') }}" class="d-flex gap-2">
+            <input
+                type="text"
+                name="q"
+                class="form-control form-control-lg"
+                placeholder="Buscar activos o planos..."
+                value="{{ query }}"
+                required
+            >
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if query %}
+    {% if results.assets or results.plans %}
+        {% if results.assets %}
+            <h3 class="mt-4 mb-3">
+                <i class="bi bi-diagram-3"></i> Activos ({{ results.assets|length }})
+            </h3>
+
+            <div class="row mb-4">
+                {% for asset in results.assets %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ asset.name }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">{{ asset.address_or_model }}</small>
+                                </p>
+                                <a href="{{ url_for('emergency.view_asset', asset_id=asset.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-file-pdf"></i> Ver Planos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if results.plans %}
+            <h3 class="mt-4 mb-3">
+                <i class="bi bi-file-pdf"></i> Planos ({{ results.plans|length }})
+            </h3>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Archivo</th>
+                            <th>Activo</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in results.plans %}
+                            <tr>
+                                <td>{{ plan.file_name }}</td>
+                                <td>{{ plan.asset.name }}</td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('emergency.view_plan', plan_id=plan.id) }}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning text-center py-4">
+            <i class="bi bi-search" style="font-size: 2rem;"></i>
+            <p class="mt-3 mb-0">No se encontraron resultados para "{{ query }}"</p>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info text-center py-4">
+        <i class="bi bi-info-circle" style="font-size: 2rem;"></i>
+        <p class="mt-3 mb-0">Ingresa un término de búsqueda</p>
+    </div>
+{% endif %}
+{% endblock %}

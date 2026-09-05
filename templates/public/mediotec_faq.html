@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Preguntas Frecuentes | Mediotec Vial{% endblock %}
+
+{% block content %}
+<section class="public-section">
+    <header class="section-header">
+        <p class="eyebrow">Preguntas Frecuentes</p>
+        <h1>Todo lo que debes saber sobre la hoja de rescate vehicular</h1>
+        <p class="section-lead">Respuestas rápidas y concretas para equipos de emergencia, bomberos y técnicos.</p>
+    </header>
+
+    <div class="faq-list" id="faqList">
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Qué es la hoja de rescate
+                vehicular?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p>Es un documento visual que identifica componentes críticos de cada vehículo en particular: airbags,
+                    zonas de corte,
+                    baterías, elementos estructurales y sistemas de combustible. Está optimizada para que los equipos de
+                    rescate actúen en situaciones de emergencia con rapidez y seguridad.</p>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Qué me provee Mediotec Vial?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p><strong>Mediotec Vial</strong> provee a sus clientes, dos obleas autoadhesivas con un código QR
+                    <strong>único y exclusivo para cada vehículo</strong>,
+                    que deben colocarse en un lugar visible en el parabrisas y luneta trasera del automotor, de manera
+                    que el personal de emergencia pueda verlos facilmente.
+                </p>
+            </div>
+        </article>
+
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Dónde debo pegar los QRs
+                autoadhesivos?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p>Deben colocarse en un lugar visible en el parabrisas y luneta trasera del automotor, de manera
+                    que el personal de emergencia pueda verlos facilmente.
+                    La imagen siguiente describe la ubicación:
+                </p>
+                <div class="hero-image" aria-hidden="true">
+                    <img src="{{ url_for('static', filename='images/donde-pegar.jpeg') }}"
+                        alt="Colocación de obleas Mediotec Vial" />
+                </div>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Qué información contiene el QR de Mediotec
+                Vial?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p><strong>Mediotec Vial</strong> provee a sus clientes, un código QR <strong>único y exclusivo para
+                        cada vehículo</strong>,
+                    que conecta a un <strong>sistema on-line</strong> con los datos particulares (en caso de GNC,
+                    potencias adicionales, etc.)
+                    del vehículo siniestrado, que son críticos a la hora del rescate.
+                </p>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">El QR de mediotec Vial, ¿Reemplaza la hoja
+                de rescate?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p> Sí. <strong>Mediotec Vial</strong> brinda el servicio digital de las hojas de rescate para que estén
+                    siempre accesibles con la simple lectura de un código QR. Evitando de esa manera, perdidas o
+                    deterioro de la información vital.</p>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Qué componentes críticos están
+                marcados?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p>Desconexión de baterías, ubicación de airbags, sistemas de combustible, cámaras y sensores, y las
+                    zonas estructurales seguras para corte. Esta información es clave para evitar daños colaterales
+                    durante el rescate.</p>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Por qué ayuda en una emergencia?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p>Reduce el tiempo de búsqueda de los puntos de acceso y evita decisiones improvisadas. Con una hoja de
+                    rescate clara, los equipos coordinan cada maniobra y minimizan el riesgo para los ocupantes y el
+                    personal de rescate.</p>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Puedo usar la hoja de rescate en vehículos
+                eléctricos?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p>Sí. <strong>Mediotec Vial</strong> integra protocolos específicos para autoplacas híbridas y
+                    eléctricas, mostrando baterías de alto voltaje y medidas de seguridad adicionales.</p>
+            </div>
+        </article>
+
+        <article class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">¿Qué ventajas tiene el uso del QR de
+                Mediotec Vial?</button>
+            <div class="faq-answer" aria-hidden="true">
+                <p>A diferencia de otras soluciones, <strong>Mediotec Vial</strong> elimina la búsqueda manual por marca
+                    y modelo. El QR del vehículo lleva directamente a su Hoja de Rescate incluyendo sus particularidades
+                    (por ejemplo el uso de GNC), ahorrando tiempo crítico en emergencias.</p>
+            </div>
+        </article>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/mediotec.js') }}"></script>
+{% endblock %}

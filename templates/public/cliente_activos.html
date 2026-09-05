@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Vehículos - Mediotec Vial{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h1 class="page-title mb-0">
+            <i class="bi bi-car-front text-primary"></i> Mis Vehículos Registrados
+        </h1>
+        <p class="text-muted mb-0">Gestión de activos vehiculares y consulta de hojas de rescate activas</p>
+    </div>
+</div>
+
+{% if activos %}
+<div class="row g-4">
+    {% for a in activos %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                <span class="badge bg-danger font-monospace fs-6">{{ a.domain or 'SIN DOMINIO' }}</span>
+                {% if a.codigo_qr %}
+                <span class="badge bg-success small"><i class="bi bi-qr-code"></i> QR Activo</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-4">
+                <h5 class="card-title fw-bold text-primary mb-1">{{ a.name }}</h5>
+                <p class="text-muted small mb-3">
+                    {{ a.brand }} {{ a.model_name }} (Año: {{ a.manufacturing_year or '--' }})
+                </p>
+
+                <div class="mb-3 p-2 bg-light rounded border">
+                    <small class="text-muted d-block">Combustible / Propulsión:</small>
+                    <span class="badge bg-info text-dark">{{ a.additional_fuel }}</span>
+                </div>
+
+                {% if a.description %}
+                <p class="card-text small text-muted mb-3">{{ a.description }}</p>
+                {% endif %}
+
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('public.hoja_rescate', uid=a.id) }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-earmark-medical me-1"></i> Ver Hoja de Rescate
+                    </a>
+                    <a href="{{ url_for('activos.editar_mi_activo', asset_id=a.id) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Actualizar Datos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card shadow-sm border-0 text-center py-5">
+    <div class="card-body">
+        <i class="bi bi-qr-code-scan text-muted" style="font-size: 3.5rem;"></i>
+        <h4 class="mt-3 text-muted">Aún no tienes vehículos registrados</h4>
+        <p class="text-muted">
+            Para registrar tu primer vehículo, escanea el código QR provisto en tu oblea física o solicita uno a la administración.
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

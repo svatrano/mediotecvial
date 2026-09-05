@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Cliente - Mediotec S.A.S.{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="page-title">
+            <i class="bi bi-plus-circle"></i> Crear Nuevo Cliente
+        </h1>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.create_client') }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre del Cliente</label>
+                        <input type="text" class="form-control" id="name" name="name"
+                            placeholder="Nombre de la empresa/institución" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contact_email" class="form-label">Email de Contacto</label>
+                        <input type="email" class="form-control" id="contact_email" name="contact_email"
+                            placeholder="contacto@cliente.com" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="address" name="address"
+                            placeholder="Dirección completa">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dni_cuit" class="form-label fw-bold">DNI o CUIT <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control font-monospace" id="dni_cuit" name="dni_cuit"
+                                placeholder="Número de documento o CUIT único" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="user_id" class="form-label fw-bold">Usuario Asociado <span class="text-muted">(Opcional)</span></label>
+                            <select class="form-select" id="user_id" name="user_id">
+                                <option value="">-- Crear usuario automáticamente --</option>
+                                {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.username }} ({{ u.email }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Si se omite, se generará una cuenta automática.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Crear Cliente
+                        </button>
+                        <a href="{{ url_for('admin.list_clients') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
