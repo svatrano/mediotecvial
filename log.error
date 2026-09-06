@@ -1,0 +1,76 @@
+2026-09-06T20:05:55.0510223Z    _____
+2026-09-06T20:05:55.0577804Z   /  _  \ __________ _________   ____
+2026-09-06T20:05:55.0578002Z  /  /_\  \\___   /  |  \_  __ \_/ __ \
+2026-09-06T20:05:55.0578042Z /    |    \/    /|  |  /|  | \/\  ___/
+2026-09-06T20:05:55.0578077Z \____|__  /_____ \____/ |__|    \___  >
+2026-09-06T20:05:55.0578126Z         \/      \/                  \/
+2026-09-06T20:05:55.0578185Z A P P   S E R V I C E   O N   L I N U X
+2026-09-06T20:05:55.057822Z
+2026-09-06T20:05:55.0578254Z Documentation     : https://aka.ms/webapp-linux
+2026-09-06T20:05:55.0578289Z Python quickstart : https://aka.ms/python-qs
+2026-09-06T20:05:55.0578332Z Python version    : 3.12.13
+2026-09-06T20:05:55.0578383Z Instance name     : 10-30-0-114
+2026-09-06T20:05:55.0578452Z Instance id       : 02a76262591ea0f7597eca2fd2b9981ab7aa1ffeef42c31c8668f8ac92082673
+2026-09-06T20:05:55.0578487Z
+2026-09-06T20:05:55.0578521Z App port          : 8000
+2026-09-06T20:05:55.0578556Z Port selected by  : Default for this image
+2026-09-06T20:05:55.0578636Z (Learn more about the PORT appsetting https://aka.ms/webapp-python-settings)
+2026-09-06T20:05:55.057867Z
+2026-09-06T20:05:55.0578721Z Note: Any data outside '/home' is not persisted
+2026-09-06T20:05:55.0578767Z
+2026-09-06T20:05:55.0578826Z ────────────────────────────────────────────────────────────────
+2026-09-06T20:05:55.0578868Z  Run 'apphelp' for available commands and aliases.
+2026-09-06T20:05:55.0578904Z  Run 'install-nettools' to install networking utilities.
+2026-09-06T20:05:55.0578952Z ────────────────────────────────────────────────────────────────
+2026-09-06T20:05:55.3881875Z Starting OpenBSD Secure Shell server: sshd.
+2026-09-06T20:05:55.4077192Z WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2026-09-06T20:05:55.4508322Z Updating certificates in /etc/ssl/certs...
+2026-09-06T20:06:00.3807455Z rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2026-09-06T20:06:00.3850543Z rehash: warning: skipping duplicate certificate in azl_SSL.com_TLS_ECC_Root_CA_2022.pem
+2026-09-06T20:06:00.3894285Z rehash: warning: skipping duplicate certificate in azl_SSL.com_TLS_RSA_Root_CA_2022.pem
+2026-09-06T20:06:00.4802372Z 4 added, 0 removed; done.
+2026-09-06T20:06:00.4803108Z Running hooks in /etc/ca-certificates/update.d...
+2026-09-06T20:06:00.4803166Z done.
+2026-09-06T20:06:00.4803205Z CA certificates copied and updated successfully.
+2026-09-06T20:06:00.4875563Z App Command Line not configured, will attempt auto-detect
+2026-09-06T20:06:01.1143261Z Starting periodic command scheduler: cron.
+2026-09-06T20:06:01.1157338Z Launching oryx with: create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -virtualEnvName antenv -defaultApp /opt/defaultsite
+2026-09-06T20:06:01.4989727Z Output is compressed. Extracting it...
+2026-09-06T20:06:01.499027Z Found zstd-compressed tarball.
+2026-09-06T20:06:01.4990344Z Extracting '/home/site/wwwroot/output.tar.zst' to directory '/tmp/8df0c522a6e3a16'...
+2026-09-06T20:06:01.4990481Z Using zstd for decompression of file: /home/site/wwwroot/output.tar.zst
+2026-09-06T20:06:01.4991139Z Found build manifest file at '/home/site/wwwroot/oryx-manifest.toml'. Deserializing it...
+2026-09-06T20:06:01.5028271Z Build Operation ID: d511987ce0a6f981
+2026-09-06T20:06:01.5028639Z Oryx Version: 0.2.20260710.1, Commit: 079b5b6294eb97d462d8f96bfa3243e9b85251da, ReleaseTagName: 20260710.1
+2026-09-06T20:06:03.0341946Z zstd tar Successfully extracted '/home/site/wwwroot/output.tar.zst' to '/tmp/8df0c522a6e3a16'
+2026-09-06T20:06:03.03424Z App path is set to '/tmp/8df0c522a6e3a16'
+2026-09-06T20:06:03.2599111Z Detected an app based on Flask
+2026-09-06T20:06:03.2599876Z Generating `gunicorn` command for 'app:app'
+2026-09-06T20:06:03.2620028Z Writing output script to '/opt/startup/startup.sh'
+2026-09-06T20:06:04.048349Z Using packages from virtual environment antenv located at /tmp/8df0c522a6e3a16/antenv.
+2026-09-06T20:06:04.0485168Z Updated PYTHONPATH to '/opt/startup/app_logs:/tmp/8df0c522a6e3a16/antenv/lib/python3.12/site-packages'
+2026-09-06T20:06:05.1637395Z [2026-09-06 20:06:05 +0000] [1884] [INFO] Starting gunicorn 21.2.0
+2026-09-06T20:06:05.1801332Z [2026-09-06 20:06:05 +0000] [1884] [INFO] Listening at: http://0.0.0.0:8000 (1884)
+2026-09-06T20:06:05.1802054Z [2026-09-06 20:06:05 +0000] [1884] [INFO] Using worker: sync
+2026-09-06T20:06:05.1821234Z [2026-09-06 20:06:05 +0000] [1887] [INFO] Booting worker with pid: 1887
+2026-09-06T20:06:05.1974291Z [2026-09-06 20:06:05 +0000] [1888] [INFO] Booting worker with pid: 1888
+2026-09-06T20:06:05.2627858Z [2026-09-06 20:06:05 +0000] [1889] [INFO] Booting worker with pid: 1889
+2026-09-06T20:06:05.3520987Z [2026-09-06 20:06:05 +0000] [1890] [INFO] Booting worker with pid: 1890
+2026-09-06T20:06:05.4468623Z [2026-09-06 20:06:05 +0000] [1891] [INFO] Booting worker with pid: 1891
+2026-09-06T20:06:05.8694477Z Failed to find attribute 'app' in 'app'.
+2026-09-06T20:06:05.8694919Z Failed to find attribute 'app' in 'app'.
+2026-09-06T20:06:05.8713434Z [2026-09-06 20:06:05 +0000] [1891] [INFO] Worker exiting (pid: 1891)
+2026-09-06T20:06:05.8713596Z Failed to find attribute 'app' in 'app'.
+2026-09-06T20:06:05.8713637Z [2026-09-06 20:06:05 +0000] [1889] [INFO] Worker exiting (pid: 1889)
+2026-09-06T20:06:05.8737764Z Failed to find attribute 'app' in 'app'.
+2026-09-06T20:06:05.8763544Z [2026-09-06 20:06:05 +0000] [1887] [INFO] Worker exiting (pid: 1887)
+2026-09-06T20:06:05.8802932Z Failed to find attribute 'app' in 'app'.
+2026-09-06T20:06:05.8814878Z [2026-09-06 20:06:05 +0000] [1888] [INFO] Worker exiting (pid: 1888)
+2026-09-06T20:06:05.8939296Z [2026-09-06 20:06:05 +0000] [1890] [INFO] Worker exiting (pid: 1890)
+2026-09-06T20:06:06.0243903Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Worker (pid:1891) exited with code 4
+2026-09-06T20:06:06.0299601Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Worker (pid:1887) was sent SIGTERM!
+2026-09-06T20:06:06.0355522Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Worker (pid:1889) was sent SIGTERM!
+2026-09-06T20:06:06.039161Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Worker (pid:1890) was sent SIGTERM!
+2026-09-06T20:06:06.0404911Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Worker (pid:1888) was sent SIGTERM!
+2026-09-06T20:06:06.1264727Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Shutting down: Master
+2026-09-06T20:06:06.1266072Z [2026-09-06 20:06:06 +0000] [1884] [ERROR] Reason: App failed to load.
