@@ -245,7 +245,7 @@ class CodigoQR(db.Model):
     lote_impresion = db.Column(db.String(50), nullable=False, index=True)
     estado = db.Column(db.String(20), nullable=False, default='VIRGEN', index=True)  # 'VIRGEN', 'ACTIVADO'
     fecha_generacion = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    activo_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=True, unique=True)
+    activo_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=True) #quité , unique=True
 
     # Relación uno a uno con Asset
     activo = db.relationship('Asset', back_populates='codigo_qr')
