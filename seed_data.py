@@ -32,7 +32,7 @@ def seed_fuel_types(db_session):
 
 
 def seed_admin_user(db_session):
-    """Crea el usuario administrador por defecto si no existe"""
+    """Crea o actualiza el usuario administrador con las credenciales de las variables de entorno"""
     from librerias.models import User
 
     admin_username = os.environ.get('USER_ADMIN', 'admin')
@@ -51,7 +51,11 @@ def seed_admin_user(db_session):
         db_session.commit()
         logger.info(f"Usuario administrador creado: {admin_username}")
     else:
-        logger.info(f"Usuario administrador ya existente: {admin_username}")
+        # Sincronizar email y contraseña desde las variables de entorno
+        admin.email = admin_email
+        admin.set_password(admin_password)
+        db_session.commit()
+        logger.info(f"Usuario administrador actualizado: {admin_username}")
 
 
 def seed_sample_vehicle_templates(db_session):
