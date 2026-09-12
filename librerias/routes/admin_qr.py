@@ -1,15 +1,20 @@
 import io
 import csv
 import uuid
+import logging
 from datetime import datetime
 from functools import wraps
+from zipfile import ZipFile
 from flask import (
     Blueprint, render_template, request, redirect, url_for,
-    flash, jsonify, Response, current_app
+    flash, jsonify, Response, send_file, current_app
 )
 from flask_login import login_required, current_user
 from sqlalchemy import or_
 from librerias.models import db, CodigoQR, Asset, Client
+from librerias.services.qr_service import generate_qr_image_bytes
+
+logger = logging.getLogger(__name__)
 
 admin_qr_bp = Blueprint('admin_qr', __name__, url_prefix='/admin/qr')
 
@@ -140,6 +145,9 @@ def generar_lote():
             'cantidad': cantidad
         }), 201
 
+    if request.form.get('descargar_zip') == '1':
+        return build_qrs_zip(nuevos_qrs, f"lote_{lote}_qrs.zip")
+
     flash(success_msg, 'success')
     return redirect(url_for('admin_qr.gestion_qrs', lote=lote))
 
@@ -251,3 +259,122 @@ def exportar_lote_csv(lote):
         mimetype="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment;filename={filename}"}
     )
+
+
+def build_qrs_zip(qr_objects, zip_filename="qrs.zip"):
+    """Genera archivo ZIP en memoria con imágenes PNG para los códigos QR dados"""
+    base_url = request.host_url.rstrip('/')
+    zip_buffer = io.BytesIO()
+    with ZipFile(zip_buffer, 'w') as zf:
+        for qr in qr_objects:
+            target_url = f"{base_url}/qr/{qr.id}"
+            img_io = generate_qr_image_bytes(target_url)
+            zf.writestr(f"qr_{qr.id}.png", img_io.getvalue())
+    zip_buffer.seek(0)
+    return send_file(
+        zip_buffer,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=zip_filename
+    )
+
+
+@admin_qr_bp.route('/lote/<lote>/zip', methods=['GET'])
+@login_required
+@admin_required
+def descargar_lote_zip(lote):
+    """Descarga archivo ZIP con todas las imágenes PNG del lote"""
+    qrs = CodigoQR.query.filter_by(lote_impresion=lote).order_by(CodigoQR.fecha_generacion.asc()).all()
+    if not qrs:
+        flash(f'No se encontraron códigos QR para el lote "{lote}".', 'warning')
+        return redirect(url_for('admin_qr.gestion_qrs'))
+
+    filename = f"lote_{lote}_pngs.zip"
+    return build_qrs_zip(qrs, filename)
+
+
+@admin_qr_bp.route('/acciones/zip', methods=['POST'])
+@login_required
+@admin_required
+def descargar_seleccionados_zip():
+    """Genera y descarga archivo ZIP con imágenes PNG de los QRs seleccionados"""
+    qr_ids = request.form.getlist('qr_ids')
+    if not qr_ids:
+        flash('No se seleccionó ningún código QR para exportar imágenes.', 'warning')
+        return redirect(url_for('admin_qr.gestion_qrs'))
+
+    qrs = CodigoQR.query.filter(CodigoQR.id.in_(qr_ids)).order_by(CodigoQR.fecha_generacion.asc()).all()
+    filename = f"qrs_seleccionados_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.zip"
+    return build_qrs_zip(qrs, filename)
+
+
+@admin_qr_bp.route('/acciones/csv', methods=['POST'])
+@login_required
+@admin_required
+def exportar_seleccionados_csv():
+    """Genera y descarga CSV con las URLs de activación/rescate de los QRs seleccionados"""
+    qr_ids = request.form.getlist('qr_ids')
+    if not qr_ids:
+        flash('No se seleccionó ningún código QR para exportar CSV.', 'warning')
+        return redirect(url_for('admin_qr.gestion_qrs'))
+
+    qrs = CodigoQR.query.filter(CodigoQR.id.in_(qr_ids)).order_by(CodigoQR.fecha_generacion.asc()).all()
+    base_url = request.host_url.rstrip('/')
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow(['UUID', 'URL_DESTINO', 'LOTE', 'ESTADO', 'FECHA_GENERACION'])
+
+    for qr_item in qrs:
+        writer.writerow([
+            qr_item.id,
+            f"{base_url}/qr/{qr_item.id}",
+            qr_item.lote_impresion,
+            qr_item.estado,
+            qr_item.fecha_generacion.strftime('%Y-%m-%d %H:%M:%S') if qr_item.fecha_generacion else ''
+        ])
+
+    csv_data = output.getvalue()
+    filename = f"qrs_seleccionados_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    return Response(
+        csv_data,
+        mimetype="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment;filename={filename}"}
+    )
+
+
+@admin_qr_bp.route('/acciones/eliminar', methods=['POST'])
+@login_required
+@admin_required
+def eliminar_o_liberar_seleccionados():
+    """Borra QRs vírgenes seleccionados y libera (desvincula) QRs activados seleccionados"""
+    qr_ids = request.form.getlist('qr_ids')
+    accion = request.form.get('accion_tipo', 'auto')
+    if not qr_ids:
+        flash('No se seleccionó ningún código QR para eliminar o liberar.', 'warning')
+        return redirect(url_for('admin_qr.gestion_qrs'))
+
+    qrs = CodigoQR.query.filter(CodigoQR.id.in_(qr_ids)).all()
+    borrados = 0
+    liberados = 0
+
+    try:
+        for qr in qrs:
+            if qr.estado == 'VIRGEN' or accion == 'borrar':
+                if qr.activo_id:
+                    qr.activo_id = None
+                db.session.delete(qr)
+                borrados += 1
+            else:
+                qr.activo_id = None
+                qr.estado = 'VIRGEN'
+                liberados += 1
+
+        db.session.commit()
+        logger.info(f"QRs procesados en lote: {borrados} borrados, {liberados} liberados a VIRGEN.")
+        flash(f'Operación completada: {borrados} QRs eliminados y {liberados} QRs liberados a estado VIRGEN.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al eliminar/liberar QRs: {str(e)}")
+        flash(f'Error al procesar la acción sobre los QRs: {str(e)}', 'danger')
+
+    return redirect(url_for('admin_qr.gestion_qrs'))

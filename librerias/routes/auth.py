@@ -196,7 +196,7 @@ def _procesar_registro_cliente(data):
 @login_required
 def profile():
     """Perfil del usuario logueado"""
-    return render_template('auth/profile.html')
+    return render_template('auth/profile.html', user=current_user)
 
 
 @auth_bp.route('/perfil/cambiar-password', methods=['GET', 'POST'])

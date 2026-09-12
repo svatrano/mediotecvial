@@ -35,6 +35,12 @@ htmlcov/
 .env.local
 .env.*.local
 GEMINI.md
+CLAUDE.md
+tareas-correccion.md
+instructivo_mediotec.html
+restart-azure-app.sh
+Design-MediotecVial.md
+arquitectura.md
 
 # Logs
 *.log

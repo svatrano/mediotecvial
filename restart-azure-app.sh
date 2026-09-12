@@ -1,10 +1,10 @@
 #!/bin/bash
 
-echo "🔧 Reiniciando Firewatch en Azure App Service"
+echo "🔧 Reiniciando Mediotec en Azure App Service"
 echo ""
 
-read -p "Nombre del App Service (ej: firewatch-app): " APP_NAME
-read -p "Grupo de Recursos (ej: firewatch-rg): " RESOURCE_GROUP
+read -p "Nombre del App Service (ej: mediotec-app): " APP_NAME
+read -p "Grupo de Recursos (ej: rg-mediotecvial-prod): " RESOURCE_GROUP
 
 echo ""
 echo "Deteniendo app service..."

@@ -53,12 +53,15 @@
                 </td>
                 <td class="text-end">
                     <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal{{ user.id }}" title="Restablecer Contraseña">
+                            <i class="bi bi-key"></i>
+                        </button>
                         <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-outline-primary"
                             title="Editar">
                             <i class="bi bi-pencil"></i>
                         </a>
                         <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
-                            style="display: inline;" onsubmit="return confirm('¿Estás seguro?');">
+                            style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
                             <button type="submit" class="btn btn-outline-danger" title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -70,6 +73,39 @@
         </tbody>
     </table>
 </div>
+
+<!-- Modales de Restablecimiento de Contraseña -->
+{% for user in users.items %}
+<div class="modal fade" id="resetPasswordModal{{ user.id }}" tabindex="-1" aria-labelledby="resetModalLabel{{ user.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="resetModalLabel{{ user.id }}">
+                    <i class="bi bi-key me-2"></i> Restablecer Contraseña
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.reset_password_admin', user_id=user.id) }}">
+                <div class="modal-body">
+                    <p class="mb-3">
+                        Asignar nueva contraseña para el usuario <strong>{{ user.username }}</strong> ({{ user.email }}):
+                    </p>
+                    <div class="mb-3">
+                        <label for="new_password_{{ user.id }}" class="form-label fw-bold">Nueva Contraseña <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="new_password_{{ user.id }}" name="new_password" minlength="6" required placeholder="Mínimo 6 caracteres">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle me-1"></i> Aplicar Contraseña
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <!-- Paginación -->
 {% if users.pages > 1 %}

@@ -12,6 +12,7 @@ from librerias.models import (
     db, User, Client, Asset, VehicleTemplate, FuelType, CodigoQR, EmergencyPlan
 )
 from librerias.services.qr_service import generate_qr_image_bytes
+from librerias.services.storage_service import upload_rescue_sheet
 
 logger = logging.getLogger(__name__)
 
@@ -256,6 +257,89 @@ def delete_user(user_id):
     return redirect(url_for('admin.list_users'))
 
 
+@admin_bp.route('/usuarios/<int:user_id>/baja_cliente', methods=['POST'])
+@login_required
+@admin_required
+def baja_cliente_admin(user_id):
+    """Baja física definitiva de cliente y sus datos relacionados en base de datos"""
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('No puedes eliminar tu propia cuenta de usuario.', 'danger')
+        return redirect(url_for('admin.list_users'))
+
+    client = user.client
+    if not client:
+        return delete_user(user_id)
+
+    vehiculos_count = client.assets.count()
+    eliminar_vehiculos = request.form.get('eliminar_vehiculos') == '1'
+
+    if vehiculos_count > 0 and not eliminar_vehiculos:
+        flash(f'El cliente tiene {vehiculos_count} vehículo(s) registrado(s). Debe confirmar la eliminación de los vehículos para proceder con la baja física.', 'warning')
+        return redirect(url_for('admin.edit_user', user_id=user.id))
+
+    try:
+        # 1. Desvincular y liberar QRs de los activos del cliente
+        activos_ids = [a.id for a in client.assets.all()]
+        if activos_ids:
+            qrs_vinculados = CodigoQR.query.filter(CodigoQR.activo_id.in_(activos_ids)).all()
+            for q in qrs_vinculados:
+                q.activo_id = None
+                q.estado = 'VIRGEN'
+
+            # 2. Eliminar planos de emergencia de los activos
+            EmergencyPlan.query.filter(EmergencyPlan.asset_id.in_(activos_ids)).delete(synchronize_session=False)
+
+            # 3. Eliminar los activos
+            Asset.query.filter(Asset.id.in_(activos_ids)).delete(synchronize_session=False)
+
+        # 4. Eliminar solicitudes de modelo faltante
+        from librerias.models import SolicitudVehiculoFaltante
+        SolicitudVehiculoFaltante.query.filter_by(client_id=client.id).delete(synchronize_session=False)
+
+        # 5. Eliminar cliente y usuario
+        cliente_nombre = client.nombre
+        usuario_nombre = user.username
+        db.session.delete(client)
+        db.session.delete(user)
+        db.session.commit()
+
+        logger.info(f"Baja física ejecutada: Cliente '{cliente_nombre}' (User: {usuario_nombre}), {vehiculos_count} vehículos eliminados y QRs liberados.")
+        flash(f'Baja física completada exitosamente para el cliente "{cliente_nombre}" y usuario "{usuario_nombre}".', 'success')
+        return redirect(url_for('admin.list_users'))
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error durante la baja física del cliente ID={client.id}: {str(e)}")
+        flash(f'Error al procesar la baja física: {str(e)}', 'danger')
+        return redirect(url_for('admin.edit_user', user_id=user.id))
+
+
+@admin_bp.route('/usuarios/<int:user_id>/reset_password', methods=['POST'])
+@login_required
+@admin_required
+def reset_password_admin(user_id):
+    """Restablece la contraseña de un usuario directamente por el administrador"""
+    user = User.query.get_or_404(user_id)
+    new_password = request.form.get('new_password', '').strip()
+
+    if not new_password or len(new_password) < 6:
+        flash('La nueva contraseña debe tener al menos 6 caracteres.', 'warning')
+        return redirect(url_for('admin.list_users'))
+
+    try:
+        user.set_password(new_password)
+        db.session.commit()
+        logger.info(f"Contraseña del usuario {user.username} restablecida por admin {current_user.username}")
+        flash(f'Contraseña actualizada exitosamente para el usuario "{user.username}".', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al restablecer contraseña para {user.username}: {str(e)}")
+        flash(f'Error al restablecer contraseña: {str(e)}', 'danger')
+
+    return redirect(url_for('admin.list_users'))
+
+
 # -------------------------------------------------------------------------
 # GESTIÓN DE ACTIVOS
 # -------------------------------------------------------------------------
@@ -413,25 +497,40 @@ def create_vehicle_template():
     model = request.form.get('model', '').strip()
     year = request.form.get('year', type=int)
     rescue_sheet_url = request.form.get('rescue_sheet_url', '').strip()
+    rescue_sheet_filename = f"{brand}_{model}_{year}.pdf"
 
     if not brand or not model or not year:
         flash('Marca, Modelo y Año son campos requeridos.', 'danger')
         return redirect(url_for('admin.list_vehicle_templates'))
 
+    # Subida de archivo a Azure Storage Blob (o fallback local)
+    file = request.files.get('file')
+    if file and file.filename:
+        try:
+            blob_url, stored_filename = upload_rescue_sheet(file, brand, model, year)
+            rescue_sheet_url = blob_url
+            rescue_sheet_filename = stored_filename
+            logger.info(f"Hoja de rescate subida correctamente para {brand} {model} ({year}): {rescue_sheet_url}")
+        except Exception as e:
+            logger.error(f"Error al subir archivo de hoja de rescate para {brand} {model}: {str(e)}")
+            flash(f"Advertencia: no se pudo guardar el archivo adjunto: {str(e)}", 'warning')
+
     vt = VehicleTemplate(
         brand=brand,
         model=model,
         year=year,
-        rescue_sheet_url=rescue_sheet_url,
-        rescue_sheet_filename=f"{brand}_{model}_{year}.pdf"
+        rescue_sheet_url=rescue_sheet_url if rescue_sheet_url else None,
+        rescue_sheet_filename=rescue_sheet_filename
     )
 
     try:
         db.session.add(vt)
         db.session.commit()
-        flash('Modelo vehicular añadido al catálogo.', 'success')
+        logger.info(f"Plantilla vehicular creada en BD ID={vt.id}: {brand} {model} ({year}) con URL: {rescue_sheet_url}")
+        flash('Modelo vehicular añadido al catálogo exitosamente.', 'success')
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Error al registrar plantilla vehicular {brand} {model} en BD: {str(e)}")
         flash(f'Error al añadir modelo: {str(e)}', 'danger')
 
     return redirect(url_for('admin.list_vehicle_templates'))
@@ -445,13 +544,28 @@ def edit_vehicle_template(template_id):
     vt.brand = request.form.get('brand', vt.brand).strip().upper()
     vt.model = request.form.get('model', vt.model).strip()
     vt.year = request.form.get('year', type=int) or vt.year
-    vt.rescue_sheet_url = request.form.get('rescue_sheet_url', vt.rescue_sheet_url).strip()
+
+    # Subida de nuevo archivo opcional
+    file = request.files.get('file')
+    if file and file.filename:
+        try:
+            blob_url, stored_filename = upload_rescue_sheet(file, vt.brand, vt.model, vt.year)
+            vt.rescue_sheet_url = blob_url
+            vt.rescue_sheet_filename = stored_filename
+            logger.info(f"Hoja de rescate actualizada para plantilla ID={vt.id}: {blob_url}")
+        except Exception as e:
+            logger.error(f"Error actualizando archivo de plantilla ID={vt.id}: {str(e)}")
+            flash(f"Error al actualizar archivo adjunto: {str(e)}", 'warning')
+    elif request.form.get('rescue_sheet_url'):
+        vt.rescue_sheet_url = request.form.get('rescue_sheet_url').strip()
 
     try:
         db.session.commit()
+        logger.info(f"Plantilla vehicular ID={vt.id} actualizada en BD.")
         flash('Plantilla vehicular actualizada.', 'success')
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Error al actualizar plantilla ID={vt.id}: {str(e)}")
         flash(f'Error: {str(e)}', 'danger')
 
     return redirect(url_for('admin.list_vehicle_templates'))
@@ -463,6 +577,21 @@ def edit_vehicle_template(template_id):
 def update_vehicle_template(template_id):
     """Alias para actualizar plantilla vehicular según list.html"""
     return edit_vehicle_template(template_id)
+
+
+@admin_bp.route('/vehicle_templates/<int:template_id>/documento', methods=['GET'])
+@login_required
+@admin_required
+def view_vehicle_template_document(template_id):
+    """Acceso controlado al documento de la plantilla vehicular"""
+    vt = VehicleTemplate.query.get_or_404(template_id)
+    if not vt.rescue_sheet_url:
+        logger.warning(f"Intento de ver documento inexistente para plantilla vehicular ID={template_id}")
+        flash('Esta plantilla no cuenta con un documento de hoja de rescate asociado.', 'warning')
+        return redirect(url_for('admin.list_vehicle_templates'))
+
+    logger.info(f"Redirigiendo a documento de plantilla vehicular ID={template_id}: {vt.rescue_sheet_url}")
+    return redirect(vt.rescue_sheet_url)
 
 
 @admin_bp.route('/vehicle_templates/<int:template_id>/eliminar', methods=['POST'])

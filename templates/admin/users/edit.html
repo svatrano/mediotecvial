@@ -64,6 +64,42 @@
                 </form>
             </div>
         </div>
+
+        {% if user.client %}
+        <div class="card mt-4 border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-x-fill me-2"></i> Baja Física de Cliente (Directa en Base de Datos)
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted">
+                    Esta acción realiza la baja física definitiva del cliente <strong>{{ user.client.nombre }}</strong> (DNI/CUIT: {{ user.client.dni_cuit }}) y del usuario <strong>{{ user.username }}</strong> directamente en la base de datos Azure SQL.
+                </p>
+                {% set vehiculos_count = user.client.assets.count() %}
+                {% if vehiculos_count > 0 %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Atención:</strong> El cliente tiene <strong>{{ vehiculos_count }}</strong> vehículo(s) registrado(s).
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('admin.baja_cliente_admin', user_id=user.id) }}" onsubmit="return confirm('¿Está COMPLETAMENTE SEGURO de realizar la baja física de este cliente y usuario? Esta acción es irreversible.');">
+                    {% if vehiculos_count > 0 %}
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="eliminar_vehiculos" value="1" id="checkEliminarVehiculos" required>
+                        <label class="form-check-label fw-bold text-danger" for="checkEliminarVehiculos">
+                            Confirmar eliminación de los {{ vehiculos_count }} vehículo(s) y liberación de sus códigos QR físicos.
+                        </label>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-outline-danger btn-lg w-100">
+                        <i class="bi bi-trash3-fill me-1"></i> Ejecutar Baja Física de Cliente
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

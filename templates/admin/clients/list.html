@@ -1,104 +1,127 @@
 {% extends "base.html" %}
 
-{% block title %}Gestión de Clientes - Mediotec S.A.S.{% endblock %}
+{% block title %}Gestión de Clientes - Mediotec Vial{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="page-title mb-0">
-        <i class="bi bi-building"></i> Gestión de Clientes
-    </h1>
+    <div>
+        <h1 class="page-title mb-0">
+            <i class="bi bi-building text-primary"></i> Gestión de Clientes
+        </h1>
+        <p class="text-muted mb-0">Administración de clientes corporativos y particulares</p>
+    </div>
     <a href="{{ url_for('admin.create_client') }}" class="btn btn-primary btn-lg">
-        <i class="bi bi-plus-circle"></i> Nuevo Cliente
+        <i class="bi bi-plus-circle me-1"></i> Nuevo Cliente
     </a>
 </div>
 
 {% if clients.items %}
-<div class="row">
-    {% for client in clients.items %}
-    <div class="col-md-6 mb-3">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-building"></i> {{ client.name }}
-                </h5>
-
-                <p class="card-text">
-                    <strong>Email:</strong> {{ client.contact_email }}
-                </p>
-
-                {% if client.phone %}
-                <p class="card-text">
-                    <strong>Teléfono:</strong> {{ client.phone }}
-                </p>
-                {% endif %}
-
-                {% if client.address %}
-                <p class="card-text">
-                    <strong>Dirección:</strong> {{ client.address }}
-                </p>
-                {% endif %}
-
-                <p class="card-text">
-                    <strong>Activos:</strong>
-                    <span class="badge bg-secondary">{{ client.assets.count() }}</span>
-                </p>
-
-                <div class="btn-group btn-group-sm w-100" role="group">
-                    <a href="{{ url_for('admin.edit_client', client_id=client.id) }}" class="btn btn-outline-primary">
-                        <i class="bi bi-pencil"></i> Editar
-                    </a>
-                    <a href="{{ url_for('admin.list_assets') }}?client_id={{ client.id }}" class="btn btn-outline-info">
-                        <i class="bi bi-diagram-3"></i> Activos
-                    </a>
-                </div>
-            </div>
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Cliente / Razón Social</th>
+                        <th>DNI / CUIT</th>
+                        <th>Email de Contacto</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Activos</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients.items %}
+                    <tr>
+                        <td class="ps-4">
+                            <i class="bi bi-building text-secondary me-1"></i>
+                            <strong>{{ client.name }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark font-monospace border">{{ client.dni_cuit or '--' }}</span>
+                        </td>
+                        <td>
+                            <a href="mailto:{{ client.contact_email }}" class="text-decoration-none text-muted">
+                                {{ client.contact_email }}
+                            </a>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ client.phone or '--' }}</small>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ client.address or '--' }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                <i class="bi bi-car-front me-1"></i>{{ client.assets.count() }} activo(s)
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ url_for('admin.edit_client', client_id=client.id) }}" class="btn btn-outline-primary" title="Editar Cliente">
+                                    <i class="bi bi-pencil me-1"></i> Editar
+                                </a>
+                                <a href="{{ url_for('admin.list_assets') }}?client_id={{ client.id }}" class="btn btn-outline-info" title="Ver Activos de este cliente">
+                                    <i class="bi bi-diagram-3 me-1"></i> Activos
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+
+        <!-- Paginación -->
+        {% if clients.pages > 1 %}
+        <div class="p-3 border-top">
+            <nav aria-label="Paginación de clientes">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if clients.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.list_clients', page=clients.prev_num) }}">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in clients.iter_pages() %}
+                    {% if page_num %}
+                    {% if page_num == clients.page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.list_clients', page=page_num) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if clients.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.list_clients', page=clients.next_num) }}">
+                            Siguiente
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
-    {% endfor %}
 </div>
-
-<!-- Paginación -->
-{% if clients.pages > 1 %}
-<nav aria-label="Paginación de clientes" class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if clients.has_prev %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('admin.list_clients', page=clients.prev_num) }}">
-                Anterior
-            </a>
-        </li>
-        {% endif %}
-
-        {% for page_num in clients.iter_pages() %}
-        {% if page_num %}
-        {% if page_num == clients.page %}
-        <li class="page-item active">
-            <span class="page-link">{{ page_num }}</span>
-        </li>
-        {% else %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('admin.list_clients', page=page_num) }}">
-                {{ page_num }}
-            </a>
-        </li>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
-
-        {% if clients.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('admin.list_clients', page=clients.next_num) }}">
-                Siguiente
-            </a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 {% else %}
-<div class="alert alert-info text-center py-4">
-    <i class="bi bi-info-circle" style="font-size: 2rem;"></i>
-    <p class="mt-3 mb-0">No hay clientes registrados</p>
+<div class="card shadow-sm border-0">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">No hay clientes registrados</h5>
+        <p class="text-muted">Utilice el botón superior para dar de alta el primer cliente.</p>
+    </div>
 </div>
 {% endif %}
 {% endblock %}

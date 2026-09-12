@@ -14,17 +14,18 @@
                 <h5 class="mb-0">Información de Cuenta</h5>
             </div>
             <div class="card-body">
+                {% set u = user if (user is defined and user) else current_user %}
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label fw-bold">Usuario:</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                        <input type="text" class="form-control" value="{{ u.username }}" disabled>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label fw-bold">Email:</label>
                     <div class="col-sm-9">
-                        <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                        <input type="email" class="form-control" value="{{ u.email }}" disabled>
                     </div>
                 </div>
 
@@ -32,9 +33,9 @@
                     <label class="col-sm-3 col-form-label fw-bold">Rol:</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" value="
-                            {% if user.role == 'admin' %}
+                            {% if u.role == 'admin' %}
                                 Administrador
-                            {% elif user.role == 'firefighter' %}
+                            {% elif u.role == 'firefighter' %}
                                 Bombero
                             {% else %}
                                 Cliente
@@ -46,7 +47,7 @@
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label fw-bold">Estado:</label>
                     <div class="col-sm-9">
-                        {% if user.is_active %}
+                        {% if u.is_active %}
                         <span class="badge bg-success">Activo</span>
                         {% else %}
                         <span class="badge bg-danger">Inactivo</span>
@@ -57,8 +58,7 @@
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label fw-bold">Miembro desde:</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" value="{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}"
-                            disabled>
+                        <input type="text" class="form-control" value="{{ u.created_at.strftime('%d/%m/%Y %H:%M') if u.created_at else '--' }}" disabled>
                     </div>
                 </div>
             </div>
