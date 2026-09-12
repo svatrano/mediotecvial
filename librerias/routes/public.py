@@ -2,10 +2,11 @@ import logging
 from datetime import datetime
 from flask import (
     Blueprint, render_template, request, redirect, url_for,
-    abort, jsonify
+    abort, jsonify, send_file
 )
 from flask_login import current_user
-from librerias.models import Asset, VehicleTemplate, CodigoQR, FuelType
+from librerias.models import Asset, CodigoQR
+from librerias.services.storage_service import read_rescue_sheet
 
 logger = logging.getLogger(__name__)
 
@@ -49,21 +50,7 @@ def hoja_rescate(uid):
     Acceso público inmediato al escanear el QR físico en el lugar del siniestro.
     Permite búsqueda por ID de activo o por UUID de Código QR.
     """
-    asset = None
-
-    # 1. Intentar buscar por ID numérico de activo
-    if str(uid).isdigit():
-        asset = Asset.query.get(int(uid))
-
-    # 2. Si no fue por ID, intentar buscar por UUID de CodigoQR
-    if not asset:
-        qr = CodigoQR.query.filter_by(id=str(uid)).first()
-        if qr and qr.activo_id:
-            asset = Asset.query.get(qr.activo_id)
-
-    # 3. Intentar buscar por dominio/patente
-    if not asset:
-        asset = Asset.query.filter_by(domain=str(uid).upper()).first()
+    asset = _resolve_public_asset(uid)
 
     if not asset:
         logger.warning(f"Hoja de rescate no encontrada para UID: {uid}")
@@ -72,6 +59,8 @@ def hoja_rescate(uid):
     # Datos técnicos del activo
     rescue_sheet = asset.vehicle_template
     fuel_type = asset.fuel_type
+    if not fuel_type:
+        abort(404)
 
     # Instrucciones críticas específicas según el tipo de combustible/propulsión
     fuel_hazard_info = _get_fuel_hazard_info(fuel_type.tipo if fuel_type else 'Sin descripcion')
@@ -80,8 +69,9 @@ def hoja_rescate(uid):
     file_url = None
     file_type = 'pdf'
     if rescue_sheet and rescue_sheet.rescue_sheet_url:
-        file_url = rescue_sheet.rescue_sheet_url
-        if file_url.lower().endswith(('.jpg', '.jpeg', '.png')):
+        file_url = url_for('public.documento_hoja_rescate', uid=uid)
+        document_name = rescue_sheet.rescue_sheet_filename or rescue_sheet.rescue_sheet_url
+        if document_name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
             file_type = 'image'
 
     return render_template(
@@ -93,6 +83,29 @@ def hoja_rescate(uid):
         file_url=file_url,
         file_type=file_type,
         now=datetime.utcnow()
+    )
+
+
+@public_bp.route('/hoja-rescate/<uid>/documento', methods=['GET'])
+def documento_hoja_rescate(uid):
+    """Entrega el documento público solo para un QR activo y con combustible."""
+    asset = _resolve_public_asset(uid)
+    rescue_sheet = asset.vehicle_template
+    if not rescue_sheet or not rescue_sheet.rescue_sheet_url or not asset.fuel_type:
+        abort(404)
+
+    try:
+        document, content_type, filename = read_rescue_sheet(
+            rescue_sheet.rescue_sheet_url, rescue_sheet.rescue_sheet_filename
+        )
+    except FileNotFoundError:
+        abort(404)
+
+    return send_file(
+        document,
+        mimetype=content_type,
+        as_attachment=request.args.get('download') == '1',
+        download_name=filename,
     )
 
 
@@ -173,3 +186,19 @@ def _get_fuel_hazard_info(fuel_type_name):
             'incendio': 'Extinguir con espuma o polvo químico seco ABC. Mantener línea de agua preventiva cargada.',
             'icono': 'bi-fuel-pump'
         }
+
+
+def _resolve_public_asset(uid):
+    """Resuelve un activo público y exige que su QR esté activado."""
+    asset = Asset.query.get(int(uid)) if str(uid).isdigit() else None
+    if not asset:
+        qr = CodigoQR.query.filter_by(id=str(uid)).first()
+        if qr and qr.estado == 'ACTIVADO' and qr.activo_id:
+            asset = Asset.query.get(qr.activo_id)
+    if not asset:
+        asset = Asset.query.filter_by(domain=str(uid).upper()).first()
+
+    if not asset or not asset.codigo_qr or asset.codigo_qr.estado != 'ACTIVADO':
+        logger.warning('Acceso público rechazado para UID sin QR activo: %s', uid)
+        abort(404)
+    return asset

@@ -235,3 +235,6 @@ Estas rutas no llevan `login_required` y, por tanto, son públicas en el código
 - `admin_required` está implementado por separado en `admin.py` y `admin_qr.py`.
 - Los endpoints `/api/*` tienen CORS abierto a cualquier origen y no usan JWT; el registro y las solicitudes de catálogo son accesibles sin autenticación.
 - La ficha `/hoja-rescate/<uid>` y todo el grupo `/emergency/*` están diseñados como consultas públicas de emergencia. Esta decisión permite el acceso inmediato en un siniestro, pero implica que los datos expuestos deben considerarse deliberadamente públicos.
+- Los documentos de hojas de rescate y planos se entregan mediante rutas de Flask, nunca mediante redirecciones a Azure Blob. Las rutas administrativas requieren `admin`; la ficha pública exige QR `ACTIVADO` y tipo de combustible registrado.
+- `GET /admin/vehicle_templates/<template_id>/documento` entrega el documento de una plantilla al administrador. `GET /admin/planes/<plan_id>/documento` entrega un plano al administrador. `GET /hoja-rescate/<uid>/documento` entrega la hoja pública validada y acepta `?download=1` para descarga.
+- El contenedor configurado en Azure debe ser privado. La configuración operativa y las variables de entorno se documentan en `storage_config.md`; las credenciales no deben tener valores por defecto en el código.

@@ -145,11 +145,7 @@ def generar_lote():
             'cantidad': cantidad
         }), 201
 
-    if request.form.get('descargar_zip') == '1':
-        return build_qrs_zip(nuevos_qrs, f"lote_{lote}_qrs.zip")
-
-    flash(success_msg, 'success')
-    return redirect(url_for('admin_qr.gestion_qrs', lote=lote))
+    return build_qrs_zip(nuevos_qrs, f"lote_{lote}_qrs.zip")
 
 
 @admin_qr_bp.route('/estado', methods=['GET'])

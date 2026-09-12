@@ -137,16 +137,32 @@ def editar_mi_activo(asset_id):
             abort(403)
 
     fuel_types = FuelType.query.order_by(FuelType.id).all()
+    vehicle_templates = VehicleTemplate.query.order_by(
+        VehicleTemplate.brand, VehicleTemplate.model, VehicleTemplate.year
+    ).all()
 
     if request.method == 'POST':
         fuel_type_id = request.form.get('fuel_type_id', type=int)
         description = request.form.get('description', '').strip()
         manufacturing_year = request.form.get('manufacturing_year', type=int)
+        vehicle_template_id = request.form.get('vehicle_template_id', type=int)
+
+        vehicle_template = VehicleTemplate.query.get(vehicle_template_id) if vehicle_template_id else None
+        if vehicle_template_id and not vehicle_template:
+            flash('La hoja de rescate seleccionada no existe.', 'danger')
+            return render_template(
+                'public/cliente_activo_editar.html',
+                asset=asset,
+                fuel_types=fuel_types,
+                vehicle_templates=vehicle_templates,
+            )
 
         if fuel_type_id:
             asset.fuel_type_id = fuel_type_id
         if manufacturing_year:
             asset.manufacturing_year = manufacturing_year
+        if vehicle_template:
+            asset.vehicle_template_id = vehicle_template.id
         asset.description = description
 
         try:
@@ -162,5 +178,6 @@ def editar_mi_activo(asset_id):
     return render_template(
         'public/cliente_activo_editar.html',
         asset=asset,
-        fuel_types=fuel_types
+        fuel_types=fuel_types,
+        vehicle_templates=vehicle_templates,
     )

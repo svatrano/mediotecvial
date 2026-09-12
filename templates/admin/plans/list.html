@@ -20,8 +20,9 @@
 <div class="card mb-3">
     <div class="card-body">
         <p class="mb-0">
-            <strong>Activo:</strong> {{ asset.name }}<br>
-            <strong>Ubicación:</strong> {{ asset.address_or_model }}
+            <strong>Activo:</strong> {{ asset.name }}
+            <span class="mx-2 text-muted">|</span>
+            <strong>Dominio:</strong> {{ asset.domain or 'Sin dominio' }}
         </p>
     </div>
 </div>
@@ -61,7 +62,7 @@
                 </td>
                 <td class="text-end">
                     <div class="btn-group btn-group-sm" role="group">
-                        <a href="{{ url_for('emergency.view_plan', plan_id=plan.id) }}" class="btn btn-outline-success"
+                        <a href="{{ url_for('admin.view_plan_document', plan_id=plan.id) }}" class="btn btn-outline-success"
                             title="Ver Plano" target="_blank">
                             <i class="bi bi-eye"></i>
                         </a>

@@ -36,6 +36,19 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="vehicle_template_id" class="form-label fw-bold">Hoja de Rescate / Plano del Vehículo</label>
+                        <select class="form-select form-select-lg" id="vehicle_template_id" name="vehicle_template_id" required>
+                            <option value="">Seleccionar hoja de rescate</option>
+                            {% for template in vehicle_templates %}
+                            <option value="{{ template.id }}" {% if asset.vehicle_template_id == template.id %}selected{% endif %}>
+                                {{ template.brand }} {{ template.model }} ({{ template.year }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Este dato determina el plano técnico visible para los rescatistas.</small>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="fuel_type_id" class="form-label fw-bold">Tipo de Combustible / Propulsión</label>
                         <select class="form-select form-select-lg" id="fuel_type_id" name="fuel_type_id" required>
                             {% for f in fuel_types %}

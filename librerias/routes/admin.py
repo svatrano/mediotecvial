@@ -12,7 +12,7 @@ from librerias.models import (
     db, User, Client, Asset, VehicleTemplate, FuelType, CodigoQR, EmergencyPlan
 )
 from librerias.services.qr_service import generate_qr_image_bytes
-from librerias.services.storage_service import upload_rescue_sheet
+from librerias.services.storage_service import read_rescue_sheet, upload_rescue_sheet
 
 logger = logging.getLogger(__name__)
 
@@ -590,8 +590,20 @@ def view_vehicle_template_document(template_id):
         flash('Esta plantilla no cuenta con un documento de hoja de rescate asociado.', 'warning')
         return redirect(url_for('admin.list_vehicle_templates'))
 
-    logger.info(f"Redirigiendo a documento de plantilla vehicular ID={template_id}: {vt.rescue_sheet_url}")
-    return redirect(vt.rescue_sheet_url)
+    try:
+        document, content_type, filename = read_rescue_sheet(
+            vt.rescue_sheet_url, vt.rescue_sheet_filename
+        )
+    except FileNotFoundError:
+        logger.warning('Documento no encontrado para plantilla vehicular ID=%s', template_id)
+        abort(404)
+
+    return send_file(
+        document,
+        mimetype=content_type,
+        as_attachment=request.args.get('download') == '1',
+        download_name=filename,
+    )
 
 
 @admin_bp.route('/vehicle_templates/<int:template_id>/eliminar', methods=['POST'])
@@ -656,6 +668,26 @@ def list_plans(asset_id):
     return render_template('admin/plans/list.html', asset=asset, plans=plans_pag)
 
 
+@admin_bp.route('/planes/<int:plan_id>/documento', methods=['GET'])
+@login_required
+@admin_required
+def view_plan_document(plan_id):
+    """Entrega un plano al administrador sin exponer su URL de almacenamiento."""
+    plan = EmergencyPlan.query.get_or_404(plan_id)
+    try:
+        document, content_type, filename = read_rescue_sheet(plan.file_path, plan.file_name)
+    except FileNotFoundError:
+        logger.warning('Plano no encontrado para EmergencyPlan ID=%s', plan_id)
+        abort(404)
+
+    return send_file(
+        document,
+        mimetype=content_type,
+        as_attachment=request.args.get('download') == '1',
+        download_name=filename,
+    )
+
+
 @admin_bp.route('/activos/<int:asset_id>/planes/subir', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -670,11 +702,32 @@ def upload_plan(asset_id):
         if not file_name:
             file_name = file.filename if file else 'documento.pdf'
 
+        file_path = file_name
+        file_type = 'pdf'
+        file_size = None
+        if file and file.filename:
+            try:
+                file_path, file_name = upload_rescue_sheet(
+                    file,
+                    asset.brand or 'activo',
+                    asset.model_name or asset.name,
+                    asset.manufacturing_year or 0,
+                )
+                file_type = file_name.rsplit('.', 1)[-1].lower() if '.' in file_name else 'pdf'
+                file.seek(0, 2)
+                file_size = file.tell()
+                file.seek(0)
+            except Exception as error:
+                logger.error('Error al guardar plano del activo %s: %s', asset_id, error)
+                flash('No se pudo guardar el archivo del plano.', 'danger')
+                return render_template('admin/plans/upload.html', asset=asset)
+
         plan = EmergencyPlan(
             asset_id=asset.id,
             file_name=file_name,
-            file_path=file_name,
-            file_type='pdf',
+            file_path=file_path,
+            file_size=file_size,
+            file_type=file_type,
             version=version,
             is_active=True
         )

@@ -7,6 +7,7 @@ from flask import (
 from flask_login import login_required, current_user
 from librerias.models import db, Asset, EmergencyPlan, VehicleTemplate, FuelType, Client
 from librerias.services.qr_service import generate_qr_image_bytes
+from librerias.services.storage_service import read_rescue_sheet
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +48,10 @@ def view_vehicle_rescue_sheet(asset_id):
     """Ficha de rescate vehicular para un activo"""
     asset = Asset.query.get_or_404(asset_id)
     rescue_sheet = asset.vehicle_template
-    file_url = rescue_sheet.rescue_sheet_url if rescue_sheet else None
+    file_url = url_for('public.documento_hoja_rescate', uid=asset.id) if rescue_sheet else None
     file_type = 'pdf'
-    if file_url and file_url.lower().endswith(('.jpg', '.jpeg', '.png')):
+    document_name = rescue_sheet.rescue_sheet_filename if rescue_sheet else ''
+    if document_name and document_name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
         file_type = 'image'
 
     return render_template(
@@ -75,7 +77,31 @@ def download_vehicle_rescue_sheet_qr(asset_id):
 def view_plan(plan_id):
     """Visualizador de un plano individual"""
     plan = EmergencyPlan.query.get_or_404(plan_id)
-    return render_template('emergency/view_plan.html', plan=plan, asset=plan.asset)
+    file_url = url_for('emergency.download_plan', plan_id=plan.id)
+    return render_template(
+        'emergency/view_plan.html',
+        plan=plan,
+        asset=plan.asset,
+        file_url=file_url,
+        file_type=plan.file_type or 'pdf',
+    )
+
+
+@emergency_bp.route('/plan/<int:plan_id>/documento', methods=['GET'])
+def download_plan(plan_id):
+    """Entrega un plano de emergencia desde la aplicación, nunca desde Blob."""
+    plan = EmergencyPlan.query.get_or_404(plan_id)
+    try:
+        document, content_type, filename = read_rescue_sheet(plan.file_path, plan.file_name)
+    except FileNotFoundError:
+        abort(404)
+
+    return send_file(
+        document,
+        mimetype=content_type,
+        as_attachment=request.args.get('download') == '1',
+        download_name=filename,
+    )
 
 
 @emergency_bp.route('/asset/<int:asset_id>/autogestion', methods=['GET', 'POST'])

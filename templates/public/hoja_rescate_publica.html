@@ -94,11 +94,11 @@
                 <a href="{{ file_url }}" target="_blank" class="btn btn-sm btn-danger">
                     <i class="bi bi-box-arrow-up-right me-1"></i> Abrir en Pantalla Completa
                 </a>
-                <a href="{{ file_url }}" download class="btn btn-sm btn-outline-light">
+                <a href="{{ file_url }}?download=1" class="btn btn-sm btn-outline-light">
                     <i class="bi bi-download me-1"></i> Descargar
                 </a>
                 {% endif %}
-                <button type="button" class="btn btn-sm btn-outline-light" onclick="window.print()">
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="printRescueSheet()">
                     <i class="bi bi-printer me-1"></i> Imprimir
                 </button>
             </div>
@@ -129,35 +129,52 @@
         </div>
     </div>
 
-    <!-- Información del Titular y Contacto de Emergencia -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-4">
-            <h5 class="fw-bold mb-3" style="color: var(--dark-blue);">
-                <i class="bi bi-person-badge me-2"></i> Datos de Titularidad y Registro
-            </h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <p class="mb-1 text-muted small">Titular / Empresa Registrada:</p>
-                    <p class="fw-bold mb-2">{{ asset.client.nombre if asset.client else 'Titular Particular' }}</p>
-                    <p class="mb-1 text-muted small">Identificación:</p>
-                    <p class="fw-semibold mb-0 font-monospace">{{ asset.client.dni_cuit if asset.client else '--' }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p class="mb-1 text-muted small">Teléfono de Contacto:</p>
-                    <p class="fw-bold mb-2">
-                        {% if asset.client and asset.client.telefono %}
-                        <a href="tel:{{ asset.client.telefono }}" class="text-decoration-none text-primary">
-                            <i class="bi bi-telephone-fill me-1"></i> {{ asset.client.telefono }}
-                        </a>
-                        {% else %}
-                        <span class="text-muted">No informado</span>
-                        {% endif %}
-                    </p>
-                    <p class="mb-1 text-muted small">Observaciones del Activo:</p>
-                    <p class="text-muted mb-0">{{ asset.description or 'Sin observaciones registradas.' }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    async function printRescueSheet() {
+        const sourceUrl = {{ file_url|tojson if file_url else 'null' }};
+        if (!sourceUrl) {
+            window.print();
+            return;
+        }
+
+        const printDocument = document.createElement('div');
+        printDocument.id = 'rescue-sheet-print-document';
+        document.body.appendChild(printDocument);
+
+        if ({{ 'true' if file_type == 'image' else 'false' }}) {
+            const image = document.createElement('img');
+            image.src = sourceUrl;
+            image.onload = () => window.print();
+            printDocument.appendChild(image);
+            return;
+        }
+
+        const pdf = await window.pdfjsLib.getDocument(sourceUrl).promise;
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+            const page = await pdf.getPage(pageNumber);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            printDocument.appendChild(canvas);
+        }
+        window.print();
+    }
+</script>
+<style>
+    #rescue-sheet-print-document { display: none; }
+    @media print {
+        body > *:not(#rescue-sheet-print-document) { display: none !important; }
+        #rescue-sheet-print-document { display: block; }
+        #rescue-sheet-print-document canvas,
+        #rescue-sheet-print-document img { display: block; width: 100%; height: auto; page-break-after: always; }
+    }
+</style>
 {% endblock %}

@@ -10,19 +10,20 @@ class Config:
     DEBUG = os.environ.get('FLASK_ENV') == 'development'
 
     # Credenciales de Azure SQL Database
-    _db_server = os.environ.get('AZURE_SQL_SERVER') or 'mediotec-west-server.database.windows.net'
-    _db_name = os.environ.get('AZURE_SQL_DATABASE') or 'mediotec_db'
-    _db_user = os.environ.get('AZURE_SQL_ADMIN_USER') or os.environ.get('AZURE_SQL_USER') or 'dbazureadmin'
-    _db_password = os.environ.get('AZURE_SQL_ADMIN_PASSWORD') or os.environ.get('AZURE_SQL_PASSWORD') or 'mediotec!DB@Sergio#'
+    _db_server = os.environ.get('AZURE_SQL_SERVER')
+    _db_name = os.environ.get('AZURE_SQL_DATABASE')
+    _db_user = os.environ.get('AZURE_SQL_ADMIN_USER') or os.environ.get('AZURE_SQL_USER')
+    _db_password = os.environ.get('AZURE_SQL_ADMIN_PASSWORD') or os.environ.get('AZURE_SQL_PASSWORD')
 
     # Codificación segura de credenciales para URLs SQLAlchemy
-    _quoted_user = urllib.parse.quote_plus(_db_user)
-    _quoted_pass = urllib.parse.quote_plus(_db_password)
-
-    _constructed_url = (
-        f'mssql+pyodbc://{_quoted_user}:{_quoted_pass}@{_db_server}:1433/{_db_name}'
-        '?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30'
-    )
+    _constructed_url = None
+    if all([_db_server, _db_name, _db_user, _db_password]):
+        _quoted_user = urllib.parse.quote_plus(_db_user)
+        _quoted_pass = urllib.parse.quote_plus(_db_password)
+        _constructed_url = (
+            f'mssql+pyodbc://{_quoted_user}:{_quoted_pass}@{_db_server}:1433/{_db_name}'
+            '?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30'
+        )
 
     # Si se especificó DATABASE_URL en .env, sanitizar o usar construida
     _raw_db_url = os.environ.get('DATABASE_URL')
@@ -41,10 +42,10 @@ class Config:
 
     # En entornos sin driver ODBC del sistema (como desarrollo local sin unixodbc instalado),
     # o si se solicita explícitamente USE_SQLITE, fallback a SQLite para desarrollo/pruebas.
-    if not _odbc_available and not os.environ.get('WEBSITE_INSTANCE_ID'):
+    if not _db_url and not os.environ.get('WEBSITE_INSTANCE_ID'):
         _db_url = os.environ.get('LOCAL_DATABASE_URL') or 'sqlite:///mediotec.db'
 
-    SQLALCHEMY_DATABASE_URI = _db_url
+    SQLALCHEMY_DATABASE_URI = _db_url or 'sqlite:///mediotec.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Engine options adaptativas
