@@ -123,7 +123,7 @@
                                 <a href="{{ url_for('admin.edit_asset', asset_id=asset.id) }}" class="btn btn-outline-primary" title="Editar Activo">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{{ url_for('admin.list_plans', asset_id=asset.id) }}" class="btn btn-outline-info" title="{% if asset.asset_type == 'vehicle' %}Ver Hoja de Rescate{% else %}Ver Planos{% endif %}">
+                                <a href="{% if asset.asset_type == 'vehicle' %}{{ url_for('public.hoja_rescate', uid=asset.id) }}{% else %}{{ url_for('admin.list_plans', asset_id=asset.id) }}{% endif %}" class="btn btn-outline-info" title="{% if asset.asset_type == 'vehicle' %}Ver Hoja de Rescate{% else %}Ver Planos{% endif %}">
                                     <i class="bi bi-file-{{ 'earmark-medical' if asset.asset_type == 'vehicle' else 'pdf' }}"></i>
                                 </a>
                                 <a href="{{ url_for('admin.upload_plan', asset_id=asset.id) }}" class="btn btn-outline-success" title="Subir Plano / Hoja">
