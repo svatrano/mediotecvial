@@ -99,6 +99,12 @@ def create_app(config_name=None):
         from librerias.routes.public import actualidad as public_actualidad
         return public_actualidad()
 
+    @app.route('/instructivo', endpoint='instructivo')
+    def instructivo():
+        from librerias.routes.public import instructivo as public_instructivo
+        return public_instructivo()
+
+
     @app.route('/politicas-privacidad', endpoint='privacy_policy')
     def privacy_policy():
         from librerias.routes.public import politicas_privacidad as public_privacy

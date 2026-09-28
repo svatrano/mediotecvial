@@ -51,10 +51,7 @@ firewatch.log
 *.db
 *.sqlite
 *.sqlite3
-
-# OCI
-.oci/
-oci_config
+drawdq_schema.json
 
 # Archivos temporales
 tmp/
@@ -65,10 +62,6 @@ temp/
 prueba_conexion.py
 backup-vehiculos.csv
 backup-db.sql
-
-# Node modules (si usas frontend tools)
-node_modules/
-npm-debug.log
 
 # Archivos del sistema
 .DS_Store
@@ -83,3 +76,4 @@ temp_uploads/
 .idea/workspace.xml
 
 AZURE_DEPLOYMENT.md
+reset_password.html

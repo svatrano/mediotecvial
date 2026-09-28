@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructivo de Instalación y Activación | Mediotec Vial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .instructivo-section {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem 0 3rem;
+    }
+
+    .instructivo-header {
+        background: var(--white);
+        border-radius: 18px;
+        padding: 2.25rem 2.5rem;
+        box-shadow: 0 4px 20px rgba(29, 53, 87, 0.07);
+        border: 1px solid rgba(29, 53, 87, 0.08);
+        border-top: 4px solid var(--primary-color);
+        margin-bottom: 2rem;
+    }
+
+    .instructivo-brand {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid rgba(29, 53, 87, 0.1);
+    }
+
+    .instructivo-logo {
+        height: 64px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .instructivo-brand-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--dark-blue);
+        line-height: 1.1;
+        letter-spacing: -0.5px;
+        margin: 0;
+    }
+
+    .instructivo-brand-sub {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--info-color, #457B9D);
+        margin: 0.35rem 0 0;
+    }
+
+    .instructivo-intro {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem;
+        line-height: 1.75;
+        color: var(--dark-blue);
+        margin: 0;
+    }
+
+    .instructivo-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+    }
+
+    .instructivo-card {
+        background: var(--white);
+        border-radius: 18px;
+        padding: 2rem 2.25rem;
+        box-shadow: 0 4px 20px rgba(29, 53, 87, 0.07);
+        border: 1px solid rgba(29, 53, 87, 0.08);
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 2rem;
+        align-items: center;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .instructivo-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 26px rgba(29, 53, 87, 0.12);
+    }
+
+    .instructivo-card-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .instructivo-step-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--dark-blue);
+        margin: 0;
+        line-height: 1.3;
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+    }
+
+    .instructivo-step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: var(--dark-blue);
+        color: var(--white);
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .instructivo-step-desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: rgba(29, 53, 87, 0.9);
+        margin: 0;
+    }
+
+    .instructivo-card-media {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #F8FAFC;
+        border-radius: 14px;
+        padding: 1.25rem;
+        border: 1px solid rgba(29, 53, 87, 0.06);
+    }
+
+    .instructivo-card-media img {
+        max-width: 100%;
+        max-height: 240px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .instructivo-card-media img:hover {
+        transform: scale(1.02);
+    }
+
+    .instructivo-slogan-card {
+        background: linear-gradient(135deg, var(--dark-blue) 0%, #112237 100%);
+        color: var(--white);
+        border-radius: 18px;
+        padding: 1.75rem 2rem;
+        text-align: center;
+        margin-top: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border-bottom: 4px solid var(--secondary-color);
+    }
+
+    .instructivo-slogan {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.25rem;
+        font-style: italic;
+        font-weight: 500;
+        margin: 0;
+        letter-spacing: 0.3px;
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    @media (max-width: 768px) {
+        .instructivo-header {
+            padding: 1.5rem;
+        }
+
+        .instructivo-brand {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .instructivo-brand-title {
+            font-size: 1.6rem;
+        }
+
+        .instructivo-card {
+            grid-template-columns: 1fr;
+            padding: 1.5rem;
+            gap: 1.25rem;
+        }
+
+        .instructivo-card-media img {
+            max-height: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="instructivo-section">
+    <!-- Encabezado con marca e introducción -->
+    <header class="instructivo-header">
+        <div class="instructivo-brand">
+            <img src="{{ url_for('static', filename='images/icono_2_fondo_blanco.png') }}"
+                 alt="Logo Mediotec Vial"
+                 class="instructivo-logo">
+            <div>
+                <h1 class="instructivo-brand-title">MEDIOTEC VIAL</h1>
+                <p class="instructivo-brand-sub">Sistema de Identificación Vehicular de Emergencia</p>
+            </div>
+        </div>
+        <p class="instructivo-intro">
+            Gracias por confiar en <strong>Mediotec Vial</strong>. En este instructivo encontrarás los pasos para instalar tu QR en tu vehículo. Una vez instalado y activado, el sistema quedará listo para su uso en caso de emergencia.
+        </p>
+    </header>
+
+    <!-- Lista de pasos del instructivo -->
+    <div class="instructivo-steps">
+        <!-- Paso 1 -->
+        <article class="instructivo-card">
+            <div class="instructivo-card-text">
+                <h2 class="instructivo-step-title"><span class="instructivo-step-num">1</span> Identificá tus stickers</h2>
+                <p class="instructivo-step-desc">
+                    En el sobre encontrarás tres (3) stickers con tu código QR. Cada uno tiene el mismo código y está diseñado para una ubicación diferente en tu vehículo, tal como se muestra en la imagen.
+                </p>
+            </div>
+            <div class="instructivo-card-media">
+                <img src="{{ url_for('static', filename='images/qr2oblea.png') }}"
+                     alt="Identificá tus stickers - Tres stickers con código QR">
+            </div>
+        </article>
+
+        <!-- Paso 2 -->
+        <article class="instructivo-card">
+            <div class="instructivo-card-text">
+                <h2 class="instructivo-step-title"><span class="instructivo-step-num">2</span> Colocá los stickers en el parabrisas y en la luneta</h2>
+                <p class="instructivo-step-desc">
+                    Pegá un sticker en el interior del parabrisas delantero y otro en el interior de la luneta trasera. Es indistinto cuál pongas en cada lugar. Al pegarlos desde adentro los protegés del clima.
+                </p>
+            </div>
+            <div class="instructivo-card-media">
+                <img src="{{ url_for('static', filename='images/donde-pegar.jpeg') }}"
+                     alt="Colocá los stickers en el parabrisas y en la luneta">
+            </div>
+        </article>
+
+        <!-- Paso 3 -->
+        <article class="instructivo-card">
+            <div class="instructivo-card-text">
+                <h2 class="instructivo-step-title"><span class="instructivo-step-num">3</span> Colocá el tercer sticker en la tapa de combustible</h2>
+                <p class="instructivo-step-desc">
+                    El tercer sticker va en la cara interior de la tapa del tanque de combustible. Esto permite que el personal de emergencias lo encuentre rápidamente.
+                </p>
+            </div>
+            <div class="instructivo-card-media">
+                <img src="{{ url_for('static', filename='images/tapa_tanque.png') }}"
+                     alt="Colocá el tercer sticker en la tapa de combustible">
+            </div>
+        </article>
+
+        <!-- Paso 4 -->
+        <article class="instructivo-card">
+            <div class="instructivo-card-text">
+                <h2 class="instructivo-step-title"><span class="instructivo-step-num">4</span> Escaneá el QR, completá los datos y activá el sistema</h2>
+                <p class="instructivo-step-desc">
+                    Escaneá el QR con la cámara de tu teléfono. Seguí los pasos, cargá los datos de tu vehículo y, al finalizar, presioná el botón ACTIVAR. ¡Tu QR quedará habilitado para emergencias!
+                </p>
+            </div>
+            <div class="instructivo-card-media">
+                <img src="{{ url_for('static', filename='images/qr2hoja.png') }}"
+                     alt="Escaneá el QR, completá los datos y activá el sistema">
+            </div>
+        </article>
+    </div>
+
+    <!-- Slogan de cierre -->
+    <div class="instructivo-slogan-card">
+        <p class="instructivo-slogan">Mediotec Vial — Un sistema pensado para cuando más importa.</p>
+    </div>
+</section>
+{% endblock %}

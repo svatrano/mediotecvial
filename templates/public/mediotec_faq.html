@@ -25,26 +25,26 @@
         <article class="faq-item">
             <button type="button" class="faq-question" aria-expanded="false">¿Qué me provee Mediotec Vial?</button>
             <div class="faq-answer" aria-hidden="true">
-                <p><strong>Mediotec Vial</strong> provee a sus clientes, dos obleas autoadhesivas con un código QR
+                <p><strong>Mediotec Vial</strong> provee a sus clientes, obleas autoadhesivas con un código QR
                     <strong>único y exclusivo para cada vehículo</strong>,
                     que deben colocarse en un lugar visible en el parabrisas y luneta trasera del automotor, de manera
-                    que el personal de emergencia pueda verlos facilmente.
+                    que el personal de emergencia pueda verlos facilmente. Y un tercer autoadhesivo para colocar en la
+                    parte interior de la tapa de combustible o carga.
                 </p>
             </div>
         </article>
 
 
         <article class="faq-item">
-            <button type="button" class="faq-question" aria-expanded="false">¿Dónde debo pegar los QRs
-                autoadhesivos?</button>
+            <a href="{{ url_for('public.instructivo') }}" class="faq-question faq-link">
+                <span>¿Dónde debo pegar los QRs autoadhesivos?</span>
+            </a>
             <div class="faq-answer" aria-hidden="true">
-                <p>Deben colocarse en un lugar visible en el parabrisas y luneta trasera del automotor, de manera
-                    que el personal de emergencia pueda verlos facilmente.
-                    La imagen siguiente describe la ubicación:
-                </p>
-                <div class="hero-image" aria-hidden="true">
-                    <img src="{{ url_for('static', filename='images/donde-pegar.jpeg') }}"
-                        alt="Colocación de obleas Mediotec Vial" />
+                <p>Para conocer la ubicación exacta y el instructivo de instalación y activación paso a paso, consultá nuestro instructivo oficial:</p>
+                <div style="margin: 1rem 0;">
+                    <a href="{{ url_for('public.instructivo') }}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; font-weight: 600;">
+                        <i class="bi bi-file-earmark-text"></i> Ir al Instructivo de Instalación y Activación &rarr;
+                    </a>
                 </div>
             </div>
         </article>

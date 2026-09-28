@@ -43,6 +43,13 @@ def actualidad():
     return render_template('public/mediotec_noticias.html')
 
 
+@public_bp.route('/instructivo', methods=['GET'], endpoint='instructivo')
+def instructivo():
+    """Instructivo oficial de colocación de stickers y activación del sistema Mediotec Vial"""
+    return render_template('public/mediotec_instructivo.html')
+
+
+
 @public_bp.route('/hoja-rescate/<uid>', methods=['GET'])
 def hoja_rescate(uid):
     """

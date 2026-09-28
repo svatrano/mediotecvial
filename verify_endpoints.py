@@ -47,6 +47,7 @@ def run_tests():
             ('/noticias', 200, "Alias Noticias"),
             ('/politicas-privacidad', 200, "Políticas de Privacidad"),
             ('/terminos', 200, "Términos y Condiciones"),
+            ('/instructivo', 200, "Instructivo de instalación y activación"),
             ('/health', 200, "Health Check Endpoint"),
         ]
 

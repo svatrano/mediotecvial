@@ -48,6 +48,9 @@
                         <a class="nav-link" href="{{ url_for('faq') }}">Preguntas Frecuentes</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('instructivo') }}">Instructivo</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('noticias') }}">Actualidad</a>
                     </li>
 
@@ -174,7 +177,7 @@
         <p>&copy; {{ current_year }} <strong>{{ app_name }}</strong> {{ app_version }} - Todos los derechos reservados - contacto: info@mediotecvial.com.ar</p>
         <p>
             <small>
-                <a href="{{ url_for('privacy_policy') }}">Política de Privacidad</a> | <a
+                <a href="{{ url_for('instructivo') }}">Instructivo</a> | <a href="{{ url_for('privacy_policy') }}">Política de Privacidad</a> | <a
                     href="{{ url_for('terms_of_service') }}">Términos de Servicio</a>
             </small>
         </p>

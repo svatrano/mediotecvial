@@ -761,6 +761,21 @@ body.view-plan-page {
     transform: rotate(45deg);
 }
 
+.faq-question.faq-link {
+    text-decoration: none;
+}
+
+.faq-question.faq-link::after {
+    content: '→';
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.faq-question.faq-link:hover::after {
+    transform: translateX(4px);
+}
+
+
 .faq-answer {
     height: 0;
     overflow: hidden;
